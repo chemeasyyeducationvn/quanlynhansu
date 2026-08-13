@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChemEasyy Education - Hệ Thống Quản Trị 2026</title>
+    <title>ChemEasyy Education - Trang Quản lý Nhân sự</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -41,7 +41,7 @@
 
         /* Marquee */
         .marquee-container { overflow: hidden; white-space: nowrap; background: #d1fae5; border-bottom: 2px solid #0f172a; }
-        .marquee-content { display: inline-block; animation: marquee 20s linear infinite; }
+        .marquee-content { display: inline-block; animation: marquee 40s linear infinite; }
         @keyframes marquee { 0% { transform: translateX(100vw); } 100% { transform: translateX(-100%); } }
 
         /* Scrollbars */
@@ -357,18 +357,18 @@
                             <!-- Large Logo Inside Box -->
                             <img src="${BRAND.logoMain}" alt="Main Logo" class="h-[140px] object-contain mb-8 filter drop-shadow-[0_4px_6px_rgba(0,0,0,0.3)] border-none outline-none bg-transparent">
                             
-                            <h2 class="text-xl font-black uppercase mb-8 text-center tracking-tight text-brand-dark w-full">ĐĂNG NHẬP HỆ THỐNG</h2>
+                            <h2 class="text-xl font-black uppercase mb-8 text-center tracking-tight text-brand-dark w-full">ĐĂNG NHẬP TRANG THÔNG TIN</h2>
                             
                             <form onsubmit="window.handleLogin(event)" class="w-full max-w-[320px] space-y-5">
                                 <div>
                                     <label class="block font-black text-[10px] mb-1 uppercase text-gray-500 tracking-wider">Mã Tài Khoản</label>
-                                    <input type="text" id="login_user" class="w-full neo-input rounded-xl px-4 py-3 text-sm font-bold bg-gray-50" placeholder="Nhập mã nhân sự" required>
+                                    <input type="text" id="login_user" class="w-full neo-input rounded-xl px-4 py-3 text-sm font-bold bg-gray-50" placeholder="" required>
                                 </div>
                                 <div>
                                     <label class="block font-black text-[10px] mb-1 uppercase text-gray-500 tracking-wider">Mật Khẩu</label>
-                                    <input type="password" id="login_pass" class="w-full neo-input rounded-xl px-4 py-3 text-sm font-bold bg-gray-50" placeholder="••••••••" required>
+                                    <input type="password" id="login_pass" class="w-full neo-input rounded-xl px-4 py-3 text-sm font-bold bg-gray-50" placeholder="" required>
                                 </div>
-                                <button type="submit" class="w-full mt-2 bg-brand-dark text-white font-black text-sm uppercase py-4 rounded-xl neo-btn">BẮT ĐẦU PHIÊN LÀM VIỆC</button>
+                                <button type="submit" class="w-full mt-2 bg-brand-dark text-white font-black text-sm uppercase py-4 rounded-xl neo-btn">BẮT ĐẦU </button>
                             </form>
                         </div>
                     </div>
