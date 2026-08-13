@@ -2,8 +2,8 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChemEasyy Education - Trang Quản lý Nhân sự</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ChemEasyy Education - Quản Trị 2026</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -29,7 +29,7 @@
 
     <style>
         /* Security & Base Styles */
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #ecfdf5; color: #0f172a; margin: 0; overflow: hidden; user-select: none; /* Block selection */ }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #ecfdf5; color: #0f172a; margin: 0; overflow: hidden; user-select: none; -webkit-user-select: none; }
         
         /* Neo-brutalism Utilities */
         .glass-panel { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 2px solid #0f172a; border-radius: 1.5rem; }
@@ -41,22 +41,22 @@
 
         /* Marquee */
         .marquee-container { overflow: hidden; white-space: nowrap; background: #d1fae5; border-bottom: 2px solid #0f172a; }
-        .marquee-content { display: inline-block; animation: marquee 40s linear infinite; }
+        .marquee-content { display: inline-block; animation: marquee 25s linear infinite; }
         @keyframes marquee { 0% { transform: translateX(100vw); } 100% { transform: translateX(-100%); } }
 
         /* Scrollbars */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #0f172a; border-radius: 10px; }
-        .custom-scrollbar { overflow-y: auto; overflow-x: hidden; }
+        .custom-scrollbar { overflow-y: auto; overflow-x: auto; }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
-        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; overflow-x: auto; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; overflow-x: auto; overflow-y: hidden; }
 
         /* Modals & Toasts */
         #modal-container { position: fixed; inset: 0; z-index: 1000; display: none; background: rgba(15,23,42,0.7); backdrop-filter: blur(4px); align-items: center; justify-content: center; padding: 1rem; }
         .modal-content { background: white; border: 2px solid #0f172a; border-radius: 1.5rem; box-shadow: 8px 8px 0px 0px rgba(15,23,42,1); width: 100%; max-width: 800px; max-height: 90vh; display: flex; flex-direction: column; animation: slideUp 0.3s ease-out; }
         #toast-container { position: fixed; bottom: 20px; left: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
-        .toast-item { pointer-events: auto; background: white; border: 2px solid #0f172a; padding: 1rem 1.5rem; border-radius: 0.75rem; box-shadow: 4px 4px 0px 0px rgba(15,23,42,1); font-weight: 800; text-transform: uppercase; font-size: 0.75rem; animation: slideInLeft 0.3s ease-out forwards; display: flex; align-items: center; gap: 0.75rem; }
+        .toast-item { pointer-events: auto; background: white; border: 2px solid #0f172a; padding: 1rem 1.5rem; border-radius: 0.75rem; box-shadow: 4px 4px 0px 0px rgba(15,23,42,1); font-weight: 800; text-transform: uppercase; font-size: 0.75rem; animation: slideInLeft 0.3s ease-out forwards; display: flex; align-items: center; gap: 0.75rem; max-width: 90vw; }
         
         /* Animations */
         @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
@@ -64,7 +64,6 @@
         .fade-in { animation: fadeIn 0.3s ease-out; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         
-        /* Utilities */
         input:disabled, select:disabled, textarea:disabled { background-color: #f1f5f9; cursor: not-allowed; opacity: 0.7; }
     </style>
 </head>
@@ -79,17 +78,13 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, setDoc, getDocs, onSnapshot, query, addDoc, updateDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, doc, getDocs, onSnapshot, query, addDoc, updateDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Security: Block F5 and Ctrl+R
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'F5' || (e.ctrlKey && e.key === 'r')) {
-                e.preventDefault();
-                showToast("Tính năng tải lại trang đã bị khóa để bảo vệ phiên làm việc.", "WARNING");
-            }
-        });
+        // Security: Block F5, Ctrl+R, Context Menu
+        document.addEventListener('keydown', function(e) { if (e.key === 'F5' || (e.ctrlKey && e.key === 'r')) { e.preventDefault(); showToast("Tải lại trang bị khóa. Hệ thống đang lưu phiên bản.", "WARNING"); } });
         document.addEventListener('contextmenu', event => event.preventDefault());
 
+        const appId = 'he-thong-thi-2026-cee';
         const firebaseConfig = {
             apiKey: "AIzaSyCbNC7RSwD_hhacqVYQkYSVX-RCdIwNSnc",
             authDomain: "he-thong-thi-2026-cee.firebaseapp.com",
@@ -102,10 +97,11 @@
         
         const BRAND = {
             logoMain: "https://i.postimg.cc/wMs3Wv7Q/8-removebg-preview.png",
+            logoSub: "https://i.postimg.cc/BbGtV3D7/9-removebg-preview.png",
             adminEmail: "chemeasyyeducation@gmail.com"
         };
 
-        const EVENT_TYPES = { 'TEACHING': 'Lịch Dạy', 'MEETING': 'Họp', 'TASK': 'Làm Việc', 'OTHER': 'Khác' };
+        const EVENT_TYPES = { 'TEACHING': 'Lịch Dạy', 'MEETING': 'Lịch Họp', 'TASK': 'Làm Việc', 'OTHER': 'Khác' };
 
         // Global State
         window.STATE = {
@@ -120,6 +116,7 @@
             marqueeAnnouncements: [],
             documents: [],
             requests: [],
+            attendanceRecords: [], 
             showDropdown: false,
             calView: 'WEEK',
             calDate: new Date(),
@@ -127,18 +124,19 @@
             unsubs: [],
             db: null,
             auth: null,
-            qrTimer: null
+            qrSession: null,
+            qrInterval: null
         };
 
         // UI Helpers
         window.showToast = (msg, type = 'SUCCESS') => {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
-            const icon = type === 'ERROR' ? '<i class="fa-solid fa-triangle-exclamation text-brand-accent text-xl"></i>' : 
-                         type === 'WARNING' ? '<i class="fa-solid fa-circle-exclamation text-brand-yellow text-xl"></i>' :
-                         '<i class="fa-solid fa-circle-check text-brand-primary text-xl"></i>';
+            const icon = type === 'ERROR' ? '<i class="fa-solid fa-triangle-exclamation text-brand-accent text-xl shrink-0"></i>' : 
+                         type === 'WARNING' ? '<i class="fa-solid fa-circle-exclamation text-brand-yellow text-xl shrink-0"></i>' :
+                         '<i class="fa-solid fa-circle-check text-brand-primary text-xl shrink-0"></i>';
             toast.className = `toast-item`;
-            toast.innerHTML = `${icon} <span class="flex-1">${msg}</span>`;
+            toast.innerHTML = `${icon} <span class="flex-1 break-words">${msg}</span>`;
             container.appendChild(toast);
             setTimeout(() => { toast.style.animation = 'slideInLeft 0.3s ease-in reverse forwards'; setTimeout(()=>toast.remove(), 300); }, 4000);
         };
@@ -147,11 +145,11 @@
             const container = document.getElementById('modal-container');
             container.innerHTML = `
                 <div class="modal-content relative flex flex-col h-full max-h-[90vh]">
-                    <div class="flex justify-between items-center p-5 border-b-2 border-brand-dark bg-gray-50 rounded-t-[1.3rem] shrink-0">
-                        <h3 class="font-black text-lg uppercase tracking-tight">${title}</h3>
+                    <div class="flex justify-between items-center p-4 md:p-5 border-b-2 border-brand-dark bg-gray-50 rounded-t-[1.3rem] shrink-0">
+                        <h3 class="font-black text-base md:text-lg uppercase tracking-tight">${title}</h3>
                         <button onclick="closeModal()" class="w-8 h-8 flex items-center justify-center neo-btn rounded-lg bg-white text-brand-dark hover:bg-brand-accent hover:text-white hover:border-brand-accent"><i class="fa-solid fa-xmark"></i></button>
                     </div>
-                    <div class="p-6 overflow-y-auto flex-1 custom-scrollbar bg-white rounded-b-[1.3rem]">
+                    <div class="p-4 md:p-6 overflow-y-auto flex-1 custom-scrollbar bg-white rounded-b-[1.3rem]">
                         ${htmlContent}
                     </div>
                 </div>`;
@@ -162,70 +160,65 @@
         const formatDate = (d) => { const year = d.getFullYear(); const month = String(d.getMonth() + 1).padStart(2, '0'); const day = String(d.getDate()).padStart(2, '0'); return `${year}-${month}-${day}`; };
         const getFormatDisplay = (dStr) => { if(!dStr) return ''; const p = dStr.split('-'); return `${p[2]}/${p[1]}/${p[0]}`; };
 
-        // MOCK ADMIN (Fallback / Initial Setup)
-        const MOCK_ADMIN = { id: 'admin1', username: 'CE22122007', password: 'Huuhuy2212@', role: 'ADMIN', name: 'Nguyễn Hữu Huy', type: 'ADMIN', status: 'ACTIVE', phone: '0900000000', email: 'admin@chemeasyy.edu.vn' };
-        
+        // MOCK ADMIN (Fallback)
+        const MOCK_ADMIN = { id: 'admin1', username: 'CE22122007', password: 'Huuhuy2212@', role: 'ADMIN', name: 'Nguyễn Hữu Huy', type: 'ADMIN', status: 'Đang làm', phone: '0900000000', email: 'admin@chemeasyy.edu.vn' };
+
         const initFirebase = async () => {
             try {
                 const app = initializeApp(firebaseConfig);
                 STATE.db = getFirestore(app);
                 STATE.auth = getAuth(app);
                 
-                // Keep session alive
                 await setPersistence(STATE.auth, browserLocalPersistence);
+                await signInAnonymously(STATE.auth);
                 
                 onAuthStateChanged(STATE.auth, async (user) => {
                     if (user) {
-                        setupRealtime();
-                        // Restore user session if refreshed
+                        setupRealtime(user.uid);
                         const savedUser = JSON.parse(localStorage.getItem('chem_currentUser'));
-                        if(savedUser) {
-                            STATE.user = savedUser;
-                            STATE.view = 'APP';
-                            renderApp();
-                        } else {
-                            renderApp();
-                        }
-                    } else {
-                        await signInAnonymously(STATE.auth);
+                        if(savedUser) { STATE.user = savedUser; STATE.view = 'APP'; }
+                        renderApp();
                     }
                 });
             } catch (error) {
-                console.error("Firebase Init Error:", error);
-                STATE.isOnline = false;
-                loadOfflineData();
-                renderApp();
+                console.warn("Firebase Init Error:", error);
+                STATE.isOnline = false; loadOfflineData(); renderApp();
             }
         };
 
-        const setupRealtime = () => {
+        const setupRealtime = (uid) => {
             STATE.unsubs.forEach(u => u()); STATE.unsubs = [];
-            const col = (name) => collection(STATE.db, name);
+            const publicCol = (name) => collection(STATE.db, 'artifacts', appId, 'public', 'data', name);
             
             const handleErr = (e) => { 
-                console.warn("Firestore Error:", e); 
-                if(STATE.isOnline) { STATE.isOnline = false; showToast("Mất kết nối CSDL. Chuyển sang Offline.", "WARNING"); loadOfflineData(); renderApp(); } 
+                console.warn("Firestore Read Error (Permission Denied). Switching to Offline mode."); 
+                if(STATE.isOnline) { 
+                    STATE.isOnline = false; 
+                    showToast("Chuyển sang chế độ Offline (Cơ sở dữ liệu đang khóa quyền).", "WARNING"); 
+                    loadOfflineData(); 
+                    renderApp(); 
+                } 
             };
             
             try {
-                STATE.unsubs.push(onSnapshot(query(col('users')), (snap) => {
+                STATE.unsubs.push(onSnapshot(query(publicCol('users')), (snap) => {
                     const dbUsers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                     STATE.users = [MOCK_ADMIN, ...dbUsers.filter(u => u.username !== MOCK_ADMIN.username)];
                     localStorage.setItem('chem_users', JSON.stringify(STATE.users));
-                    if(STATE.view !== 'LOGIN' && STATE.activeTab === 'USERS') renderApp();
+                    if(STATE.activeTab === 'USERS' || STATE.activeTab === 'DASHBOARD') renderApp();
                 }, handleErr));
 
-                STATE.unsubs.push(onSnapshot(query(col('events')), (snap) => { 
+                STATE.unsubs.push(onSnapshot(query(publicCol('events')), (snap) => { 
                     STATE.events = snap.docs.map(d => ({ id: d.id, ...d.data() })); localStorage.setItem('chem_events', JSON.stringify(STATE.events));
                     if(STATE.activeTab === 'CALENDAR' || STATE.activeTab === 'DASHBOARD') renderApp(); 
                 }, handleErr));
 
-                STATE.unsubs.push(onSnapshot(query(col('tasks')), (snap) => { 
+                STATE.unsubs.push(onSnapshot(query(publicCol('tasks')), (snap) => { 
                     STATE.tasks = snap.docs.map(d => ({ id: d.id, ...d.data() })); localStorage.setItem('chem_tasks', JSON.stringify(STATE.tasks));
                     if(STATE.activeTab === 'TASKS') renderApp(); 
                 }, handleErr));
 
-                STATE.unsubs.push(onSnapshot(query(col('announcements')), (snap) => { 
+                STATE.unsubs.push(onSnapshot(query(publicCol('announcements')), (snap) => { 
                     const all = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                     STATE.loginAnnouncements = all.filter(a => a.type === 'LOGIN');
                     STATE.marqueeAnnouncements = all.filter(a => a.type === 'MARQUEE');
@@ -233,14 +226,19 @@
                     renderApp(); 
                 }, handleErr));
 
-                STATE.unsubs.push(onSnapshot(query(col('documents')), (snap) => { 
+                STATE.unsubs.push(onSnapshot(query(publicCol('requests')), (snap) => { 
+                    STATE.requests = snap.docs.map(d => ({ id: d.id, ...d.data() })); localStorage.setItem('chem_reqs', JSON.stringify(STATE.requests));
+                    if(STATE.activeTab === 'REQUESTS') renderApp(); 
+                }, handleErr));
+                
+                STATE.unsubs.push(onSnapshot(query(publicCol('documents')), (snap) => { 
                     STATE.documents = snap.docs.map(d => ({ id: d.id, ...d.data() })); localStorage.setItem('chem_docs', JSON.stringify(STATE.documents));
                     if(STATE.activeTab === 'DOCS') renderApp(); 
                 }, handleErr));
-                
-                STATE.unsubs.push(onSnapshot(query(col('requests')), (snap) => { 
-                    STATE.requests = snap.docs.map(d => ({ id: d.id, ...d.data() })); localStorage.setItem('chem_reqs', JSON.stringify(STATE.requests));
-                    if(STATE.activeTab === 'REQUESTS') renderApp(); 
+
+                STATE.unsubs.push(onSnapshot(query(publicCol('attendance')), (snap) => { 
+                    STATE.attendanceRecords = snap.docs.map(d => ({ id: d.id, ...d.data() })); localStorage.setItem('chem_att', JSON.stringify(STATE.attendanceRecords));
+                    if(STATE.activeTab === 'ATTENDANCE') renderApp(); 
                 }, handleErr));
 
             } catch(e) { handleErr(e); }
@@ -253,48 +251,32 @@
             const anns = JSON.parse(localStorage.getItem('chem_anns')) || [];
             STATE.loginAnnouncements = anns.filter(a => a.type === 'LOGIN');
             STATE.marqueeAnnouncements = anns.filter(a => a.type === 'MARQUEE');
-            STATE.documents = JSON.parse(localStorage.getItem('chem_docs')) || [];
             STATE.requests = JSON.parse(localStorage.getItem('chem_reqs')) || [];
+            STATE.documents = JSON.parse(localStorage.getItem('chem_docs')) || [];
+            STATE.attendanceRecords = JSON.parse(localStorage.getItem('chem_att')) || [];
         };
 
         window.handleLogin = (e) => {
             e.preventDefault();
             const u = document.getElementById('login_user').value.trim();
             const p = document.getElementById('login_pass').value.trim();
-            
             const user = STATE.users.find(x => x.username === u && x.password === p);
             if (user) {
-                if(user.status && (user.status === 'Tạm nghỉ' || user.status === 'Nghỉ việc')) return showToast('Tài khoản đang bị khóa.', 'ERROR');
-                STATE.user = user;
-                STATE.view = 'APP';
-                STATE.activeTab = 'DASHBOARD';
+                if(user.status && (user.status === 'Tạm nghỉ' || user.status === 'Nghỉ việc')) return showToast('Tài khoản bị khóa.', 'ERROR');
+                STATE.user = user; STATE.view = 'APP'; STATE.activeTab = 'DASHBOARD';
                 localStorage.setItem('chem_currentUser', JSON.stringify(user));
-                showToast(`Xin chào, ${user.name}`);
-                renderApp();
-            } else {
-                showToast('Mã nhân sự hoặc mật khẩu không đúng!', 'ERROR');
-            }
+                showToast(`Xin chào, ${user.name}`); renderApp();
+            } else { showToast('Mã nhân sự hoặc mật khẩu sai!', 'ERROR'); }
         };
 
-        window.handleLogout = () => { 
-            STATE.user = null; STATE.view = 'LOGIN'; STATE.showDropdown = false; 
-            localStorage.removeItem('chem_currentUser');
-            showToast('Đã đăng xuất'); renderApp(); 
-        };
-        
+        window.handleLogout = () => { STATE.user = null; STATE.view = 'LOGIN'; STATE.showDropdown = false; localStorage.removeItem('chem_currentUser'); showToast('Đã đăng xuất'); renderApp(); };
         window.changeTab = (tab) => { STATE.activeTab = tab; STATE.showDropdown = false; renderApp(); };
         window.toggleDropdown = () => { STATE.showDropdown = !STATE.showDropdown; renderApp(); };
 
         const renderApp = () => {
             const root = document.getElementById('app');
-            if (STATE.view === 'LOGIN') {
-                root.innerHTML = renderLoginScreen();
-                startClock();
-            } else {
-                stopClock();
-                root.innerHTML = renderWorkspace();
-                if(STATE.activeTab === 'ATTENDANCE') initQRCode();
-            }
+            if (STATE.view === 'LOGIN') { root.innerHTML = renderLoginScreen(); startClock(); } 
+            else { stopClock(); root.innerHTML = renderWorkspace(); }
         };
 
         let clockInterval;
@@ -302,13 +284,15 @@
             if(clockInterval) clearInterval(clockInterval);
             const tick = () => {
                 const el = document.getElementById('verticalClock');
-                if(el) {
+                if(el) { 
                     const d = new Date();
-                    el.innerHTML = `<span class="text-3xl">${String(d.getHours()).padStart(2,'0')}</span><span class="text-3xl">:</span><span class="text-3xl">${String(d.getMinutes()).padStart(2,'0')}</span><span class="text-3xl">:</span><span class="text-brand-primary text-3xl">${String(d.getSeconds()).padStart(2,'0')}</span>`;
+                    const days = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+                    const dateStr = `${days[d.getDay()]}, ${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+                    const timeStr = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:<span class="text-brand-primary">${String(d.getSeconds()).padStart(2,'0')}</span>`;
+                    el.innerHTML = `<i class="fa-regular fa-calendar mr-1.5"></i> ${dateStr} <span class="mx-2 text-gray-300">|</span> <i class="fa-regular fa-clock mr-1.5"></i> ${timeStr}`;
                 }
             };
-            tick();
-            clockInterval = setInterval(tick, 1000);
+            tick(); clockInterval = setInterval(tick, 1000);
         };
         const stopClock = () => clearInterval(clockInterval);
 
@@ -318,25 +302,26 @@
         };
 
         const renderLoginScreen = () => {
-            const marquees = STATE.marqueeAnnouncements.length > 0 ? STATE.marqueeAnnouncements.map(a => a.title).join(' • ') : "CHÀO MỪNG ĐẾN VỚI HỆ THỐNG QUẢN TRỊ 2026 - CHEMEASYY EDUCATION";
+            const marquees = STATE.marqueeAnnouncements.length > 0 ? STATE.marqueeAnnouncements.map(a => a.title).join(' • ') : "HỆ THỐNG QUẢN TRỊ 2026 - CHEMEASYY EDUCATION";
             
             return `
-            <div class="w-full h-full flex flex-col relative">
+            <div class="w-full h-full flex flex-col relative bg-emerald-50">
                 <!-- Topbar -->
-                <div class="h-12 bg-white border-b-2 border-brand-dark flex items-center shrink-0 z-20">
-                    <div class="marquee-container flex-1 h-full flex items-center px-4 bg-brand-light border-none">
-                        <span class="marquee-content font-black text-sm uppercase tracking-widest text-brand-primary"><i class="fa-solid fa-bullhorn mr-2"></i> ${marquees}</span>
+                <div class="h-10 md:h-12 bg-white border-b-2 border-brand-dark flex items-center shrink-0 z-20 shadow-sm">
+                    <div class="marquee-container flex-1 h-full flex items-center px-4 border-none">
+                        <span class="marquee-content font-black text-xs md:text-sm uppercase tracking-widest text-brand-primary"><i class="fa-solid fa-bullhorn mr-2"></i> ${marquees}</span>
                     </div>
                 </div>
 
                 <!-- Main Content -->
-                <div class="flex-1 w-full flex items-center justify-center p-4 relative z-10">
-                    <div class="w-full max-w-[950px] h-[550px] bg-brand-bg border-2 border-brand-dark shadow-neo flex flex-col md:flex-row relative rounded-2xl overflow-hidden">
+                <div class="flex-1 w-full flex items-center justify-center p-4 relative z-10 overflow-y-auto">
+                    <!-- Login Box (Responsive) -->
+                    <div class="w-full max-w-[900px] min-h-[500px] h-auto md:h-[550px] bg-brand-bg border-2 border-brand-dark shadow-neo flex flex-col md:flex-row relative rounded-2xl overflow-hidden mt-4 md:mt-0">
                         
                         <!-- Left Panel: Announcements -->
-                        <div class="w-full md:w-1/2 flex flex-col border-b-2 md:border-b-0 md:border-r-2 border-brand-dark bg-white/50">
+                        <div class="w-full md:w-1/2 flex flex-col border-b-2 md:border-b-0 md:border-r-2 border-brand-dark bg-white/60">
                             <div class="p-6 border-b-2 border-brand-dark bg-white shrink-0 text-center">
-                                <h2 class="text-2xl font-black uppercase tracking-tight text-brand-dark">BẢNG THÔNG TIN</h2>
+                                <h2 class="text-xl md:text-2xl font-black uppercase tracking-tight text-brand-dark">BẢNG THÔNG TIN</h2>
                             </div>
                             <div class="flex-1 p-6 overflow-y-auto custom-scrollbar space-y-4">
                                 ${STATE.loginAnnouncements.length === 0 ? '<p class="text-center font-bold text-gray-400 text-sm mt-10">Chưa có thông báo mới</p>' : 
@@ -344,7 +329,6 @@
                                     <div onclick="viewLoginAnnouncement('${a.id}')" class="bg-white border-2 border-brand-dark p-4 rounded-xl shadow-sm hover:shadow-neo-sm hover:-translate-y-1 transition-all cursor-pointer group">
                                         <div class="flex justify-between items-center mb-2">
                                             <span class="px-2 py-0.5 text-[9px] font-black uppercase border border-brand-dark rounded bg-brand-light text-brand-dark">THÔNG BÁO</span>
-                                            <span class="text-[10px] font-bold text-gray-500">${getFormatDisplay(a.date)}</span>
                                         </div>
                                         <h4 class="text-sm font-black uppercase leading-snug group-hover:text-brand-primary transition-colors line-clamp-2">${a.title}</h4>
                                     </div>
@@ -353,31 +337,29 @@
                         </div>
 
                         <!-- Right Panel: Login -->
-                        <div class="w-full md:w-1/2 flex flex-col justify-center items-center bg-white p-10 relative">
-                            <!-- Large Logo Inside Box -->
-                            <img src="${BRAND.logoMain}" alt="Main Logo" class="h-[140px] object-contain mb-8 filter drop-shadow-[0_4px_6px_rgba(0,0,0,0.3)] border-none outline-none bg-transparent">
+                        <div class="w-full md:w-1/2 flex flex-col justify-center items-center bg-white p-6 md:p-10 relative">
+                            <!-- Main Logo replacing Sub Logo inside the box -->
+                            <img src="${BRAND.logoMain}" alt="Main Logo" class="h-[80px] md:h-[100px] w-auto object-contain mb-6 filter drop-shadow-md">
                             
-                            <h2 class="text-xl font-black uppercase mb-8 text-center tracking-tight text-brand-dark w-full">ĐĂNG NHẬP TRANG THÔNG TIN</h2>
+                            <h2 class="text-lg md:text-xl font-black uppercase mb-8 text-center tracking-tight text-brand-dark w-full">ĐĂNG NHẬP HỆ THỐNG</h2>
                             
                             <form onsubmit="window.handleLogin(event)" class="w-full max-w-[320px] space-y-5">
                                 <div>
                                     <label class="block font-black text-[10px] mb-1 uppercase text-gray-500 tracking-wider">Mã Tài Khoản</label>
-                                    <input type="text" id="login_user" class="w-full neo-input rounded-xl px-4 py-3 text-sm font-bold bg-gray-50" placeholder="" required>
+                                    <input type="text" id="login_user" class="w-full neo-input rounded-xl px-4 py-3 text-sm font-bold bg-gray-50" placeholder="Mã GV / Admin" required>
                                 </div>
                                 <div>
                                     <label class="block font-black text-[10px] mb-1 uppercase text-gray-500 tracking-wider">Mật Khẩu</label>
-                                    <input type="password" id="login_pass" class="w-full neo-input rounded-xl px-4 py-3 text-sm font-bold bg-gray-50" placeholder="" required>
+                                    <input type="password" id="login_pass" class="w-full neo-input rounded-xl px-4 py-3 text-sm font-bold bg-gray-50" placeholder="••••••••" required>
                                 </div>
-                                <button type="submit" class="w-full mt-2 bg-brand-dark text-white font-black text-sm uppercase py-4 rounded-xl neo-btn">BẮT ĐẦU </button>
+                                <button type="submit" class="w-full mt-2 bg-brand-dark text-white font-black text-sm uppercase py-4 rounded-xl neo-btn">BẮT ĐẦU PHIÊN LÀM VIỆC</button>
                             </form>
                         </div>
                     </div>
                 </div>
 
-                <!-- Vertical Clock Bottom Right -->
-                <div class="absolute bottom-6 right-6 flex flex-col items-center justify-center font-black text-brand-dark z-50 bg-white border-2 border-brand-dark p-3 shadow-neo rounded-xl" id="verticalClock">
-                    --:--:--
-                </div>
+                <!-- Clock Badge -->
+                <div class="absolute bottom-4 right-4 bg-white/90 backdrop-blur px-4 py-2 border-2 border-brand-dark rounded-xl shadow-neo-sm font-black text-[10px] sm:text-xs text-brand-dark z-50 flex items-center" id="verticalClock"></div>
             </div>`;
         };
 
@@ -399,42 +381,42 @@
                 { id: 'TASKS', icon: 'fa-list-check', text: 'Công Việc' },
                 { id: 'ATTENDANCE', icon: 'fa-qrcode', text: 'Chấm Công' },
                 { id: 'DOCS', icon: 'fa-folder-open', text: 'Tài Liệu' },
-                { id: 'REQUESTS', icon: 'fa-paper-plane', text: 'Gửi Yêu Cầu' }
+                { id: 'REQUESTS', icon: 'fa-paper-plane', text: 'Yêu Cầu' }
             ];
 
             return `
-            <div class="flex flex-col h-full w-full">
+            <div class="flex flex-col h-screen w-full overflow-hidden bg-emerald-50">
                 <!-- Header -->
-                <div class="h-16 bg-white border-b-2 border-brand-dark flex items-center justify-between px-6 shrink-0 z-30 shadow-sm">
+                <div class="h-14 md:h-16 bg-white border-b-2 border-brand-dark flex items-center justify-between px-4 md:px-6 shrink-0 z-30 shadow-sm">
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 border-2 border-brand-dark rounded-full flex items-center justify-center font-black bg-brand-light text-brand-dark">C</div>
+                        <img src="${BRAND.logoSub}" alt="Logo" class="h-8 md:h-10 object-contain drop-shadow-sm">
                         <div class="hidden sm:block border-l-2 border-brand-dark pl-3">
                             <h1 class="font-black text-xs uppercase leading-tight tracking-wider text-brand-dark">CHEMEASYY EDUCATION</h1>
                             <p class="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Mở trí - Luyện tài - Dựng nhân</p>
                         </div>
                     </div>
                     
-                    <div class="hidden md:block text-center flex-1">
+                    <div class="hidden lg:block text-center flex-1">
                         <span class="font-black text-sm uppercase tracking-widest bg-brand-light text-brand-primary px-4 py-1.5 rounded-lg border-2 border-brand-dark shadow-neo-sm">HỆ THỐNG QUẢN TRỊ 2026</span>
                     </div>
 
                     <!-- User Menu -->
                     <div class="relative">
-                        <button onclick="window.toggleDropdown()" class="flex items-center gap-3 hover:bg-gray-50 px-3 py-1.5 rounded-xl transition-colors border-2 border-transparent hover:border-brand-dark">
+                        <button onclick="window.toggleDropdown()" class="flex items-center gap-2 md:gap-3 hover:bg-gray-50 px-2 py-1 md:px-3 md:py-1.5 rounded-xl transition-colors border-2 border-transparent hover:border-brand-dark">
                             <div class="text-right hidden sm:block">
-                                <p class="font-black text-xs uppercase text-brand-dark leading-tight">${STATE.user.name}</p>
-                                <p class="text-[9px] font-bold text-gray-500 uppercase">${STATE.user.type === 'ADMIN' ? 'Quản Trị Viên' : 'Giáo Viên'} - ${STATE.user.username}</p>
+                                <p class="font-black text-[10px] md:text-xs uppercase text-brand-dark leading-tight">${STATE.user.name}</p>
+                                <p class="text-[8px] md:text-[9px] font-bold text-gray-500 uppercase">${STATE.user.type === 'ADMIN' ? 'Admin' : 'Giáo Viên'} - ${STATE.user.username}</p>
                             </div>
-                            <div class="w-8 h-8 bg-brand-dark text-white rounded-full flex items-center justify-center font-black border-2 border-brand-dark">${STATE.user.name.charAt(0)}</div>
+                            <div class="w-7 h-7 md:w-8 md:h-8 bg-brand-dark text-white rounded-full flex items-center justify-center font-black border-2 border-brand-dark text-xs">${STATE.user.name.charAt(0)}</div>
                             <i class="fa-solid fa-chevron-down text-[10px] text-gray-600 transition-transform ${STATE.showDropdown ? 'rotate-180' : ''}"></i>
                         </button>
 
                         ${STATE.showDropdown ? `
-                        <div class="absolute top-[3.5rem] right-0 w-64 bg-white border-2 border-brand-dark rounded-xl shadow-neo z-50 overflow-hidden fade-in">
+                        <div class="absolute top-[3rem] right-0 w-64 bg-white border-2 border-brand-dark rounded-xl shadow-neo z-50 overflow-hidden fade-in">
                             <div class="p-5 border-b-2 border-brand-dark bg-brand-bg text-center">
-                                <div class="w-14 h-14 bg-brand-primary text-white rounded-full flex items-center justify-center font-black text-2xl mx-auto border-2 border-brand-dark mb-2">${STATE.user.name.charAt(0)}</div>
+                                <div class="w-12 h-12 bg-brand-primary text-white rounded-full flex items-center justify-center font-black text-xl mx-auto border-2 border-brand-dark mb-2">${STATE.user.name.charAt(0)}</div>
                                 <p class="font-black text-sm uppercase text-brand-dark">${STATE.user.name}</p>
-                                <p class="text-[10px] font-bold text-gray-600 uppercase mt-1">${STATE.user.username}</p>
+                                <p class="text-[10px] font-bold text-gray-600 uppercase mt-1">${STATE.user.type === 'ADMIN' ? 'Quản Trị Viên' : 'Giáo Viên'} - ${STATE.user.username}</p>
                             </div>
                             <div class="p-2">
                                 <button onclick="window.viewProfile('${STATE.user.id}')" class="w-full text-left px-4 py-3 text-xs font-black uppercase hover:bg-gray-100 flex items-center gap-3 rounded-lg"><i class="fa-regular fa-id-badge text-brand-primary"></i> Xem Hồ Sơ Chi Tiết</button>
@@ -446,18 +428,18 @@
                 </div>
 
                 <!-- Nav Menu -->
-                <div class="flex items-center bg-white border-b-2 border-brand-dark overflow-x-auto shrink-0 hide-scrollbar shadow-sm">
+                <div class="flex items-center bg-white border-b-2 border-brand-dark overflow-x-auto shrink-0 hide-scrollbar shadow-sm touch-pan-x">
                     ${MENUS.map(m => `
-                        <button onclick="window.changeTab('${m.id}')" class="px-5 py-3.5 font-black text-[10px] uppercase border-r-2 border-brand-dark flex items-center gap-2 whitespace-nowrap transition-colors tracking-wider ${STATE.activeTab === m.id ? 'bg-brand-dark text-white' : 'hover:bg-gray-50 text-gray-600'}">
+                        <button onclick="window.changeTab('${m.id}')" class="px-4 py-3 md:px-5 md:py-3.5 font-black text-[9px] md:text-[10px] uppercase border-r-2 border-brand-dark flex items-center gap-2 whitespace-nowrap transition-colors tracking-wider shrink-0 ${STATE.activeTab === m.id ? 'bg-brand-dark text-white' : 'hover:bg-gray-50 text-gray-600'}">
                             <i class="fa-solid ${m.icon} text-sm"></i> ${m.text}
                         </button>
                     `).join('')}
-                    <div class="flex-1"></div>
-                    ${isAdmin ? `<div class="hidden lg:flex items-center px-4 font-black text-[9px] uppercase text-gray-400 bg-gray-50 border-l-2 border-brand-dark"><i class="fa-solid fa-keyboard mr-2"></i> Nhấn Ctrl+K mở lệnh nhanh</div>` : ''}
+                    <div class="flex-1 min-w-[20px]"></div>
+                    ${isAdmin ? `<div class="hidden lg:flex items-center px-4 font-black text-[9px] uppercase text-gray-400 bg-gray-50 border-l-2 border-brand-dark whitespace-nowrap"><i class="fa-solid fa-keyboard mr-2"></i> Nhấn Ctrl+K mở lệnh nhanh</div>` : ''}
                 </div>
 
                 <!-- Main Content Area -->
-                <div class="flex-1 overflow-hidden p-4 lg:p-6 relative z-10 fade-in bg-white/40">
+                <div class="flex-1 overflow-hidden p-2 md:p-4 lg:p-6 relative z-10 fade-in">
                     <div class="w-full h-full glass-panel overflow-hidden flex flex-col shadow-sm">
                         <div class="flex-1 overflow-y-auto p-4 md:p-6 custom-scrollbar">
                             ${renderActiveModule(isAdmin)}
@@ -485,45 +467,45 @@
             if(isAdmin) {
                 const gvCount = STATE.users.filter(u => u.type === 'TEACHER').length;
                 const tgCount = STATE.users.filter(u => u.type === 'ASSISTANT').length;
-                const classCount = STATE.events.length;
+                const classCount = STATE.events.filter(e=>e.type==='TEACHING').length;
 
                 return `
                 <div class="max-w-6xl mx-auto space-y-6 fade-in">
-                    <h2 class="text-2xl font-black uppercase border-b-2 border-brand-dark pb-2 tracking-tight">TỔNG QUAN HỆ THỐNG</h2>
+                    <h2 class="text-xl md:text-2xl font-black uppercase border-b-2 border-brand-dark pb-2 tracking-tight">TỔNG QUAN HỆ THỐNG</h2>
                     
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div class="bg-brand-light border-2 border-brand-dark p-5 rounded-2xl shadow-neo-sm"><p class="text-[10px] font-black uppercase text-gray-600 mb-1">Số Giáo Viên</p><h3 class="text-4xl font-black text-brand-dark">${gvCount}</h3></div>
-                        <div class="bg-blue-100 border-2 border-brand-dark p-5 rounded-2xl shadow-neo-sm"><p class="text-[10px] font-black uppercase text-gray-600 mb-1">Số Trợ Giảng</p><h3 class="text-4xl font-black text-brand-dark">${tgCount}</h3></div>
-                        <div class="bg-purple-100 border-2 border-brand-dark p-5 rounded-2xl shadow-neo-sm"><p class="text-[10px] font-black uppercase text-gray-600 mb-1">Tổng Số Lớp</p><h3 class="text-4xl font-black text-brand-dark">${classCount}</h3></div>
-                        <div class="bg-brand-primary border-2 border-brand-dark p-5 rounded-2xl shadow-neo"><p class="text-[10px] font-black uppercase text-white mb-1">Đang Truy Cập</p><h3 class="text-4xl font-black text-white">1</h3></div>
+                        <div class="bg-brand-light border-2 border-brand-dark p-4 md:p-5 rounded-2xl shadow-neo-sm"><p class="text-[9px] md:text-[10px] font-black uppercase text-gray-600 mb-1">Số Giáo Viên</p><h3 class="text-3xl md:text-4xl font-black text-brand-dark">${gvCount}</h3></div>
+                        <div class="bg-blue-100 border-2 border-brand-dark p-4 md:p-5 rounded-2xl shadow-neo-sm"><p class="text-[9px] md:text-[10px] font-black uppercase text-gray-600 mb-1">Số Trợ Giảng</p><h3 class="text-3xl md:text-4xl font-black text-brand-dark">${tgCount}</h3></div>
+                        <div class="bg-purple-100 border-2 border-brand-dark p-4 md:p-5 rounded-2xl shadow-neo-sm"><p class="text-[9px] md:text-[10px] font-black uppercase text-gray-600 mb-1">Tổng Số Lớp</p><h3 class="text-3xl md:text-4xl font-black text-brand-dark">${classCount}</h3></div>
+                        <div class="bg-brand-primary border-2 border-brand-dark p-4 md:p-5 rounded-2xl shadow-neo"><p class="text-[9px] md:text-[10px] font-black uppercase text-white mb-1">Đang Truy Cập</p><h3 class="text-3xl md:text-4xl font-black text-white">1</h3></div>
                     </div>
 
-                    <div class="bg-white border-2 border-brand-dark p-6 rounded-2xl shadow-neo-sm">
-                        <div class="flex justify-between items-center mb-6 border-b-2 border-gray-100 pb-3">
-                            <h3 class="font-black uppercase text-lg">Thống Kê Ca Dạy</h3>
-                            <div class="flex border-2 border-brand-dark rounded-lg bg-gray-50 overflow-hidden text-[10px] font-black uppercase">
-                                <button onclick="window.setDashPeriod('DAY')" class="px-4 py-2 ${STATE.dashboardPeriod==='DAY'?'bg-white border-r-2 border-brand-dark':'text-gray-500 border-r-2 border-brand-dark'}">Ngày</button>
-                                <button onclick="window.setDashPeriod('WEEK')" class="px-4 py-2 ${STATE.dashboardPeriod==='WEEK'?'bg-white border-r-2 border-brand-dark':'text-gray-500 border-r-2 border-brand-dark'}">Tuần</button>
-                                <button onclick="window.setDashPeriod('MONTH')" class="px-4 py-2 ${STATE.dashboardPeriod==='MONTH'?'bg-white':'text-gray-500'}">Tháng</button>
+                    <div class="bg-white border-2 border-brand-dark p-4 md:p-6 rounded-2xl shadow-neo-sm overflow-hidden">
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 border-b-2 border-gray-100 pb-3 gap-3">
+                            <h3 class="font-black uppercase text-base md:text-lg">Thống Kê Ca Dạy</h3>
+                            <div class="flex border-2 border-brand-dark rounded-lg bg-gray-50 overflow-hidden text-[9px] md:text-[10px] font-black uppercase w-full md:w-auto">
+                                <button onclick="window.setDashPeriod('DAY')" class="flex-1 md:flex-none px-4 py-2 ${STATE.dashboardPeriod==='DAY'?'bg-white border-r-2 border-brand-dark shadow-sm':'text-gray-500 border-r-2 border-brand-dark'}">Ngày</button>
+                                <button onclick="window.setDashPeriod('WEEK')" class="flex-1 md:flex-none px-4 py-2 ${STATE.dashboardPeriod==='WEEK'?'bg-white border-r-2 border-brand-dark shadow-sm':'text-gray-500 border-r-2 border-brand-dark'}">Tuần</button>
+                                <button onclick="window.setDashPeriod('MONTH')" class="flex-1 md:flex-none px-4 py-2 ${STATE.dashboardPeriod==='MONTH'?'bg-white shadow-sm':'text-gray-500'}">Tháng</button>
                             </div>
                         </div>
-                        <div class="h-40 flex items-end gap-4 border-b-2 border-brand-dark pb-2 px-2 justify-around">
-                            <div class="w-16 bg-brand-primary border-2 border-brand-dark relative group rounded-t-lg transition-all" style="height: 40%"><span class="absolute -top-7 left-1/2 -translate-x-1/2 font-black text-xs">5</span><span class="absolute -bottom-8 left-1/2 -translate-x-1/2 font-black text-[10px] text-gray-500">Đã Dạy</span></div>
-                            <div class="w-16 bg-brand-yellow border-2 border-brand-dark relative group rounded-t-lg transition-all" style="height: 70%"><span class="absolute -top-7 left-1/2 -translate-x-1/2 font-black text-xs">12</span><span class="absolute -bottom-8 left-1/2 -translate-x-1/2 font-black text-[10px] text-gray-500">Sắp Tới</span></div>
-                            <div class="w-16 bg-brand-dark border-2 border-brand-dark relative group rounded-t-lg transition-all" style="height: 100%"><span class="absolute -top-7 left-1/2 -translate-x-1/2 font-black text-xs text-white">17</span><span class="absolute -bottom-8 left-1/2 -translate-x-1/2 font-black text-[10px] text-gray-500">Tổng</span></div>
+                        <div class="h-40 flex items-end gap-2 md:gap-4 border-b-2 border-brand-dark pb-2 px-2 justify-around overflow-x-auto hide-scrollbar">
+                            <div class="w-12 md:w-16 bg-brand-primary border-2 border-brand-dark relative group rounded-t-lg transition-all shrink-0" style="height: 40%"><span class="absolute -top-7 left-1/2 -translate-x-1/2 font-black text-xs">5</span><span class="absolute -bottom-8 left-1/2 -translate-x-1/2 font-black text-[9px] md:text-[10px] text-gray-500 text-center w-full">Đã Dạy</span></div>
+                            <div class="w-12 md:w-16 bg-brand-yellow border-2 border-brand-dark relative group rounded-t-lg transition-all shrink-0" style="height: 70%"><span class="absolute -top-7 left-1/2 -translate-x-1/2 font-black text-xs">12</span><span class="absolute -bottom-8 left-1/2 -translate-x-1/2 font-black text-[9px] md:text-[10px] text-gray-500 text-center w-full">Sắp Tới</span></div>
+                            <div class="w-12 md:w-16 bg-brand-dark border-2 border-brand-dark relative group rounded-t-lg transition-all shrink-0" style="height: 100%"><span class="absolute -top-7 left-1/2 -translate-x-1/2 font-black text-xs text-white">17</span><span class="absolute -bottom-8 left-1/2 -translate-x-1/2 font-black text-[9px] md:text-[10px] text-gray-500 text-center w-full">Tổng</span></div>
                         </div>
                     </div>
                 </div>`;
             } else {
                 return `
-                <div class="max-w-4xl mx-auto mt-10 bg-white border-2 border-brand-dark p-8 rounded-3xl shadow-neo flex flex-col md:flex-row items-center gap-8 fade-in">
-                    <div class="w-32 h-32 bg-brand-light border-2 border-brand-dark rounded-full flex items-center justify-center shrink-0 shadow-inner">
-                        <i class="fa-solid fa-user-tie text-5xl text-brand-primary"></i>
+                <div class="max-w-4xl mx-auto mt-6 md:mt-10 bg-white border-2 border-brand-dark p-6 md:p-8 rounded-3xl shadow-neo flex flex-col md:flex-row items-center gap-6 md:gap-8 fade-in">
+                    <div class="w-24 h-24 md:w-32 md:h-32 bg-brand-light border-2 border-brand-dark rounded-full flex items-center justify-center shrink-0 shadow-inner">
+                        <i class="fa-solid fa-user-tie text-4xl md:text-5xl text-brand-primary"></i>
                     </div>
                     <div class="text-center md:text-left">
-                        <p class="text-[10px] font-black uppercase text-gray-500 tracking-widest mb-1">DASHBOARD CÁ NHÂN</p>
-                        <h2 class="text-3xl font-black uppercase tracking-tight text-brand-dark mb-3">Xin chào, ${STATE.user.name}</h2>
-                        <p class="font-bold text-sm text-gray-600 leading-relaxed">Chào mừng bạn trở lại Hệ thống. Vui lòng kiểm tra Lịch của tôi và phần Công việc trong ngày để cập nhật nhiệm vụ.</p>
+                        <p class="text-[9px] md:text-[10px] font-black uppercase text-gray-500 tracking-widest mb-1">DASHBOARD CÁ NHÂN</p>
+                        <h2 class="text-2xl md:text-3xl font-black uppercase tracking-tight text-brand-dark mb-3">Xin chào, ${STATE.user.name}</h2>
+                        <p class="font-bold text-xs md:text-sm text-gray-600 leading-relaxed">Chào mừng bạn trở lại Hệ thống. Vui lòng kiểm tra Lịch của tôi và phần Công việc trong ngày để cập nhật nhiệm vụ.</p>
                     </div>
                 </div>`;
             }
@@ -533,30 +515,29 @@
         const renderUsersModule = () => {
             const rows = STATE.users.map(u => `
                 <tr class="border-b-2 border-gray-100 hover:bg-gray-50 transition-colors">
-                    <td class="p-4 font-black text-xs uppercase whitespace-nowrap">${u.username}</td>
-                    <td class="p-4"><div class="font-black text-sm uppercase">${u.name}</div><div class="text-[9px] font-bold text-gray-500 uppercase mt-0.5">${u.type==='ADMIN'?'Admin':u.type==='TEACHER'?'Giáo viên':'Trợ giảng'}</div></td>
-                    <td class="p-4 font-bold text-xs">${u.phone || '---'}</td>
-                    <td class="p-4 font-bold text-xs"><span class="bg-gray-100 px-2 py-1 rounded border border-gray-200">${u.subject || '---'}</span></td>
-                    <td class="p-4"><span class="px-2.5 py-1 text-[9px] font-black uppercase border-2 border-brand-dark rounded shadow-sm ${u.status === 'Đang làm' ? 'bg-brand-primary text-white' : u.status === 'Tạm nghỉ' ? 'bg-brand-yellow text-brand-dark' : 'bg-gray-300 text-gray-600'}">${u.status || 'Đang làm'}</span></td>
-                    <td class="p-4 text-right whitespace-nowrap">
-                        <button onclick="window.viewProfile('${u.id}')" class="w-8 h-8 bg-white border-2 border-brand-dark rounded-lg text-xs hover:bg-gray-100 shadow-sm mr-1"><i class="fa-regular fa-eye"></i></button>
-                        <button onclick="window.openUserModal('${u.id}')" class="w-8 h-8 bg-brand-dark text-white border-2 border-brand-dark rounded-lg text-xs hover:bg-brand-primary shadow-sm mr-1"><i class="fa-solid fa-pen"></i></button>
-                        <button onclick="window.deleteUser('${u.id}')" class="w-8 h-8 bg-brand-accent text-white border-2 border-brand-dark rounded-lg text-xs hover:bg-pink-600 shadow-sm"><i class="fa-solid fa-trash"></i></button>
+                    <td class="p-3 md:p-4 font-black text-[10px] md:text-xs uppercase whitespace-nowrap">${u.username}</td>
+                    <td class="p-3 md:p-4 min-w-[150px]"><div class="font-black text-xs md:text-sm uppercase">${u.name}</div><div class="text-[8px] md:text-[9px] font-bold text-gray-500 uppercase mt-0.5">${u.type==='ADMIN'?'Admin':u.type==='TEACHER'?'Giáo viên':'Trợ giảng'}</div></td>
+                    <td class="p-3 md:p-4 font-bold text-[10px] md:text-xs whitespace-nowrap">${u.phone || '---'}</td>
+                    <td class="p-3 md:p-4 font-bold text-[10px] md:text-xs"><span class="bg-gray-100 px-2 py-1 rounded border border-gray-200 whitespace-nowrap">${u.subject || '---'}</span></td>
+                    <td class="p-3 md:p-4"><span class="px-2 py-1 text-[8px] md:text-[9px] font-black uppercase border-2 border-brand-dark rounded shadow-sm whitespace-nowrap ${u.status === 'Đang làm' ? 'bg-brand-primary text-white' : u.status === 'Tạm nghỉ' ? 'bg-brand-yellow text-brand-dark' : 'bg-gray-300 text-gray-600'}">${u.status || 'Đang làm'}</span></td>
+                    <td class="p-3 md:p-4 text-right whitespace-nowrap">
+                        <button onclick="window.viewProfile('${u.id}')" class="w-7 h-7 md:w-8 md:h-8 bg-white border-2 border-brand-dark rounded-lg text-[10px] md:text-xs hover:bg-gray-100 shadow-sm mr-1"><i class="fa-regular fa-eye"></i></button>
+                        <button onclick="window.openUserModal('${u.id}')" class="w-7 h-7 md:w-8 md:h-8 bg-brand-dark text-white border-2 border-brand-dark rounded-lg text-[10px] md:text-xs hover:bg-brand-primary shadow-sm"><i class="fa-solid fa-pen"></i></button>
                     </td>
                 </tr>
             `).join('');
 
             return `
-            <div class="h-full flex flex-col fade-in max-w-6xl mx-auto">
-                <div class="flex justify-between items-end border-b-2 border-brand-dark pb-3 mb-5 shrink-0">
-                    <h2 class="text-2xl font-black uppercase tracking-tight text-brand-dark">QUẢN LÝ NHÂN SỰ</h2>
-                    <button onclick="window.openUserModal()" class="px-5 py-2.5 bg-brand-dark text-white font-black text-xs uppercase neo-btn rounded-xl flex items-center gap-2"><i class="fa-solid fa-user-plus"></i> THÊM NHÂN SỰ</button>
+            <div class="h-full flex flex-col fade-in max-w-6xl mx-auto w-full">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end border-b-2 border-brand-dark pb-3 mb-5 shrink-0 gap-3">
+                    <h2 class="text-xl md:text-2xl font-black uppercase tracking-tight text-brand-dark">QUẢN LÝ NHÂN SỰ</h2>
+                    <button onclick="window.openUserModal()" class="w-full sm:w-auto px-5 py-2.5 bg-brand-dark text-white font-black text-[10px] md:text-xs uppercase neo-btn rounded-xl flex items-center justify-center gap-2"><i class="fa-solid fa-user-plus"></i> THÊM NHÂN SỰ</button>
                 </div>
-                <div class="flex-1 bg-white border-2 border-brand-dark rounded-2xl shadow-neo-sm flex flex-col overflow-hidden">
-                    <div class="overflow-y-auto flex-1 custom-scrollbar">
-                        <table class="w-full text-left border-collapse">
-                            <thead class="bg-gray-100 border-b-2 border-brand-dark text-[10px] font-black uppercase text-gray-600 sticky top-0 z-10">
-                                <tr><th class="p-4">Mã NV</th><th class="p-4">Họ Tên</th><th class="p-4">Điện thoại</th><th class="p-4">Chuyên môn</th><th class="p-4">Trạng thái</th><th class="p-4 text-right">Thao tác</th></tr>
+                <div class="flex-1 bg-white border-2 border-brand-dark rounded-2xl shadow-neo-sm flex flex-col overflow-hidden w-full">
+                    <div class="overflow-auto flex-1 custom-scrollbar w-full">
+                        <table class="w-full text-left border-collapse min-w-[600px]">
+                            <thead class="bg-gray-100 border-b-2 border-brand-dark text-[9px] md:text-[10px] font-black uppercase text-gray-600 sticky top-0 z-10">
+                                <tr><th class="p-3 md:p-4 whitespace-nowrap">Mã NV</th><th class="p-3 md:p-4 whitespace-nowrap">Họ Tên</th><th class="p-3 md:p-4 whitespace-nowrap">Điện thoại</th><th class="p-3 md:p-4 whitespace-nowrap">Chuyên môn</th><th class="p-3 md:p-4 whitespace-nowrap">Trạng thái</th><th class="p-3 md:p-4 text-right whitespace-nowrap">Thao tác</th></tr>
                             </thead>
                             <tbody>${rows}</tbody>
                         </table>
@@ -568,32 +549,32 @@
         window.viewProfile = (id) => {
             const u = STATE.users.find(x => x.id === id) || STATE.user;
             const html = `
-                <div class="flex gap-6 mb-6 pb-6 border-b-2 border-brand-dark items-center">
-                    <img src="${u.avatar || 'https://placehold.co/100x100/10b981/ffffff?text='+u.name.charAt(0)}" class="w-24 h-24 rounded-2xl border-2 border-brand-dark object-cover shadow-neo shrink-0" onerror="this.src='https://placehold.co/100x100/10b981/ffffff?text=${u.name.charAt(0)}'">
+                <div class="flex flex-col sm:flex-row gap-4 sm:gap-6 mb-6 pb-6 border-b-2 border-brand-dark items-center sm:items-start text-center sm:text-left">
+                    <img src="${u.avatar || 'https://placehold.co/100x100/10b981/ffffff?text='+u.name.charAt(0)}" class="w-20 h-20 md:w-24 md:h-24 rounded-2xl border-2 border-brand-dark object-cover shadow-neo shrink-0" onerror="this.src='https://placehold.co/100x100/10b981/ffffff?text=${u.name.charAt(0)}'">
                     <div>
-                        <h2 class="text-2xl font-black uppercase mb-2">${u.name}</h2>
-                        <div class="flex flex-wrap gap-2">
-                            <span class="bg-brand-light px-2.5 py-1 text-[10px] font-black uppercase rounded border border-brand-dark text-brand-dark">${u.type === 'TEACHER' ? 'Giáo Viên' : u.type==='ADMIN'?'Admin':'Trợ Giảng'}</span>
-                            <span class="bg-gray-100 px-2.5 py-1 text-[10px] font-black uppercase rounded border border-brand-dark text-gray-700">MÃ: ${u.username}</span>
-                            <span class="px-2.5 py-1 text-[10px] font-black uppercase rounded border border-brand-dark text-white ${u.status==='Đang làm'?'bg-brand-primary':'bg-gray-500'}">${u.status || 'Đang làm'}</span>
+                        <h2 class="text-xl md:text-2xl font-black uppercase mb-2">${u.name}</h2>
+                        <div class="flex flex-wrap justify-center sm:justify-start gap-2">
+                            <span class="bg-brand-light px-2 py-1 text-[9px] md:text-[10px] font-black uppercase rounded border border-brand-dark text-brand-dark">${u.type === 'TEACHER' ? 'Giáo Viên' : u.type==='ADMIN'?'Admin':'Trợ Giảng'}</span>
+                            <span class="bg-gray-100 px-2 py-1 text-[9px] md:text-[10px] font-black uppercase rounded border border-brand-dark text-gray-700">MÃ: ${u.username}</span>
+                            <span class="px-2 py-1 text-[9px] md:text-[10px] font-black uppercase rounded border border-brand-dark text-white ${u.status==='Đang làm'?'bg-brand-primary':'bg-gray-500'}">${u.status || 'Đang làm'}</span>
                         </div>
                     </div>
                 </div>
-                <div class="grid grid-cols-2 gap-4 text-sm font-bold">
-                    <div class="space-y-3">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs md:text-sm font-bold">
+                    <div class="space-y-3 bg-gray-50 p-4 border border-gray-200 rounded-xl">
                         <h4 class="font-black uppercase text-[10px] text-gray-500 border-b border-gray-200 pb-1">Liên Hệ</h4>
-                        <p><i class="fa-solid fa-phone w-5 text-gray-400"></i> ${u.phone || '---'}</p>
-                        <p><i class="fa-solid fa-envelope w-5 text-gray-400"></i> ${u.email || '---'}</p>
-                        <p><i class="fa-solid fa-cake-candles w-5 text-gray-400"></i> ${u.dob || '---'}</p>
-                        <p><i class="fa-solid fa-location-dot w-5 text-gray-400"></i> ${u.address || '---'}</p>
+                        <p class="flex items-center gap-2"><i class="fa-solid fa-phone w-4 text-gray-400"></i> ${u.phone || '---'}</p>
+                        <p class="flex items-center gap-2"><i class="fa-solid fa-envelope w-4 text-gray-400"></i> <span class="truncate">${u.email || '---'}</span></p>
+                        <p class="flex items-center gap-2"><i class="fa-solid fa-cake-candles w-4 text-gray-400"></i> ${u.dob || '---'}</p>
+                        <p class="flex items-center gap-2"><i class="fa-solid fa-location-dot w-4 text-gray-400"></i> <span class="truncate">${u.address || '---'}</span></p>
                     </div>
-                    <div class="space-y-3">
+                    <div class="space-y-3 bg-gray-50 p-4 border border-gray-200 rounded-xl">
                         <h4 class="font-black uppercase text-[10px] text-gray-500 border-b border-gray-200 pb-1">Chuyên Môn</h4>
-                        <p class="text-xs"><span class="text-gray-400">Môn:</span> ${u.subject || '---'}</p>
-                        <p class="text-xs"><span class="text-gray-400">Khối:</span> ${u.grade || '---'}</p>
-                        <p class="text-xs"><span class="text-gray-400">CT:</span> ${u.program || '---'}</p>
-                        <p class="text-xs"><span class="text-gray-400">KN:</span> ${u.exp || '---'}</p>
-                        <p class="text-xs"><span class="text-gray-400">Chứng chỉ:</span> ${u.certs || '---'}</p>
+                        <p><span class="text-gray-400 text-xs mr-1">Môn:</span> ${u.subject || '---'}</p>
+                        <p><span class="text-gray-400 text-xs mr-1">Khối:</span> ${u.grade || '---'}</p>
+                        <p><span class="text-gray-400 text-xs mr-1">CT:</span> ${u.program || '---'}</p>
+                        <p><span class="text-gray-400 text-xs mr-1">KN:</span> ${u.exp || '---'}</p>
+                        <p><span class="text-gray-400 text-xs mr-1">Chứng chỉ:</span> ${u.certs || '---'}</p>
                     </div>
                 </div>
             `;
@@ -605,10 +586,10 @@
             const html = `
                 <form onsubmit="window.saveUser(event, '${id}')" class="space-y-4">
                     <div class="bg-gray-50 p-4 border-2 border-brand-dark rounded-xl space-y-4">
-                        <div class="grid grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div><label class="block text-[10px] font-black uppercase mb-1.5">Mã NV / Username</label><input type="text" id="u_user" value="${u.username||''}" class="w-full neo-input p-2.5 rounded-lg text-sm" required ${id?'readonly bg-gray-200':''}></div>
                             <div><label class="block text-[10px] font-black uppercase mb-1.5">Mật khẩu</label><input type="text" id="u_pass" value="${u.password||''}" class="w-full neo-input p-2.5 rounded-lg text-sm" required></div>
-                            <div class="col-span-2"><label class="block text-[10px] font-black uppercase mb-1.5">Họ và Tên</label><input type="text" id="u_name" value="${u.name||''}" class="w-full neo-input p-2.5 rounded-lg text-sm" required></div>
+                            <div class="sm:col-span-2"><label class="block text-[10px] font-black uppercase mb-1.5">Họ và Tên</label><input type="text" id="u_name" value="${u.name||''}" class="w-full neo-input p-2.5 rounded-lg text-sm" required></div>
                             <div><label class="block text-[10px] font-black uppercase mb-1.5">Điện thoại</label><input type="text" id="u_phone" value="${u.phone||''}" class="w-full neo-input p-2.5 rounded-lg text-sm"></div>
                             <div><label class="block text-[10px] font-black uppercase mb-1.5">Email</label><input type="email" id="u_email" value="${u.email||''}" class="w-full neo-input p-2.5 rounded-lg text-sm"></div>
                             <div><label class="block text-[10px] font-black uppercase mb-1.5">Ngày sinh</label><input type="date" id="u_dob" value="${u.dob||''}" class="w-full neo-input p-2.5 rounded-lg text-sm"></div>
@@ -624,7 +605,7 @@
                     </div>
                     <div class="bg-gray-50 p-4 border-2 border-brand-dark rounded-xl">
                         <h4 class="font-black text-xs uppercase mb-3 border-b border-gray-300 pb-1">Thông tin chuyên môn</h4>
-                        <div class="grid grid-cols-3 gap-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             <div><label class="block text-[10px] font-black uppercase mb-1.5">Môn</label><input type="text" id="u_subject" value="${u.subject||''}" placeholder="Toán, Lý..." class="w-full neo-input p-2.5 rounded-lg text-sm"></div>
                             <div><label class="block text-[10px] font-black uppercase mb-1.5">Khối</label><input type="text" id="u_grade" value="${u.grade||''}" placeholder="10, 11, 12" class="w-full neo-input p-2.5 rounded-lg text-sm"></div>
                             <div><label class="block text-[10px] font-black uppercase mb-1.5">Chương trình</label><input type="text" id="u_program" value="${u.program||''}" placeholder="THPT, ĐGNL..." class="w-full neo-input p-2.5 rounded-lg text-sm"></div>
@@ -648,11 +629,11 @@
             };
             try {
                 if (id && id !== 'null') {
-                    if(STATE.isOnline) await updateDoc(doc(STATE.db, 'users', id), data);
+                    if(STATE.isOnline && STATE.db) await updateDoc(doc(STATE.db, 'artifacts', appId, 'public', 'data', 'users', id), data);
                     else { const idx = STATE.users.findIndex(x => x.id === id); if(idx!==-1) STATE.users[idx] = {...STATE.users[idx], ...data}; }
                     showToast('Cập nhật thành công');
                 } else {
-                    if(STATE.isOnline) await addDoc(collection(STATE.db, 'users'), data);
+                    if(STATE.isOnline && STATE.db) await addDoc(collection(STATE.db, 'artifacts', appId, 'public', 'data', 'users'), data);
                     else STATE.users.push({ id: 'u' + Date.now(), ...data });
                     showToast('Thêm mới thành công');
                 }
@@ -661,44 +642,33 @@
             } catch (err) { showToast('Lỗi lưu dữ liệu', 'ERROR'); }
         };
 
-        window.deleteUser = async (id) => {
-            if(confirm('Chắc chắn xóa nhân sự này? Thao tác không thể hoàn tác.')) {
-                try {
-                    if(STATE.isOnline) await deleteDoc(doc(STATE.db, 'users', id));
-                    else STATE.users = STATE.users.filter(x => x.id !== id);
-                    if(!STATE.isOnline) localStorage.setItem('chem_users', JSON.stringify(STATE.users));
-                    showToast('Đã xóa thành công'); renderApp();
-                } catch(e) { showToast('Lỗi xóa', 'ERROR'); }
-            }
-        };
-
         const renderCalendarModule = (isAdmin) => {
             const view = STATE.calView;
             
             return `
-            <div class="h-full flex flex-col fade-in max-w-6xl mx-auto">
+            <div class="h-full flex flex-col fade-in max-w-6xl mx-auto w-full">
                 <!-- Toolbar -->
-                <div class="flex justify-between items-center border-b-2 border-brand-dark pb-3 mb-4 shrink-0">
-                    <div class="flex items-center gap-3">
-                        <button onclick="window.changeCalDate(-1)" class="w-8 h-8 bg-white border-2 border-brand-dark rounded-lg flex items-center justify-center hover:bg-gray-100 shadow-neo-sm"><i class="fa-solid fa-chevron-left"></i></button>
-                        <div class="px-4 h-8 flex items-center justify-center bg-brand-light border-2 border-brand-dark font-black uppercase shadow-neo-sm text-xs rounded-lg min-w-[150px]">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b-2 border-brand-dark pb-3 mb-4 shrink-0 gap-3">
+                    <div class="flex items-center gap-2 md:gap-3 w-full md:w-auto overflow-x-auto hide-scrollbar pb-1 md:pb-0">
+                        <button onclick="window.changeCalDate(-1)" class="w-8 h-8 shrink-0 bg-white border-2 border-brand-dark rounded-lg flex items-center justify-center hover:bg-gray-100 shadow-neo-sm"><i class="fa-solid fa-chevron-left"></i></button>
+                        <div class="px-3 md:px-4 h-8 flex items-center justify-center bg-brand-light border-2 border-brand-dark font-black uppercase shadow-neo-sm text-[10px] md:text-xs rounded-lg whitespace-nowrap min-w-[120px] md:min-w-[150px]">
                             ${getCalHeader()}
                         </div>
-                        <button onclick="window.changeCalDate(1)" class="w-8 h-8 bg-white border-2 border-brand-dark rounded-lg flex items-center justify-center hover:bg-gray-100 shadow-neo-sm"><i class="fa-solid fa-chevron-right"></i></button>
-                        <button onclick="window.setCalToday()" class="px-3 h-8 bg-brand-dark text-white border-2 border-brand-dark font-black uppercase text-[10px] rounded-lg hover:bg-brand-primary shadow-neo-sm ml-2">Hôm nay</button>
+                        <button onclick="window.changeCalDate(1)" class="w-8 h-8 shrink-0 bg-white border-2 border-brand-dark rounded-lg flex items-center justify-center hover:bg-gray-100 shadow-neo-sm"><i class="fa-solid fa-chevron-right"></i></button>
+                        <button onclick="window.setCalToday()" class="px-3 h-8 shrink-0 bg-brand-dark text-white border-2 border-brand-dark font-black uppercase text-[9px] md:text-[10px] rounded-lg hover:bg-brand-primary shadow-neo-sm ml-1 md:ml-2">Hôm nay</button>
                     </div>
                     
-                    <div class="flex items-center gap-4">
+                    <div class="flex items-center gap-2 md:gap-4 w-full md:w-auto justify-between md:justify-end">
                         <!-- View Toggle -->
                         <div class="flex bg-gray-100 p-1 border-2 border-brand-dark rounded-lg">
-                            ${['YEAR', 'MONTH', 'WEEK', 'DAY'].map(v => `<button onclick="window.setCalView('${v}')" class="px-3 py-1.5 text-[9px] font-black uppercase rounded ${view===v ? 'bg-white border-2 border-brand-dark shadow-sm':'text-gray-500 hover:text-brand-dark'}">${v}</button>`).join('')}
+                            ${['YEAR', 'MONTH', 'WEEK', 'DAY'].map(v => `<button onclick="window.setCalView('${v}')" class="px-2 md:px-3 py-1.5 text-[8px] md:text-[9px] font-black uppercase rounded ${view===v ? 'bg-white border-2 border-brand-dark shadow-sm':'text-gray-500 hover:text-brand-dark'}">${v}</button>`).join('')}
                         </div>
-                        ${isAdmin ? `<button onclick="window.openEventModal()" class="h-9 px-4 bg-brand-primary text-white border-2 border-brand-dark font-black uppercase text-[10px] flex items-center gap-2 shadow-neo rounded-lg hover:-translate-y-0.5 transition-transform"><i class="fa-solid fa-plus"></i> Tạo Sự Kiện</button>` : ''}
+                        ${isAdmin ? `<button onclick="window.openEventModal()" class="h-8 md:h-9 px-3 md:px-4 bg-brand-primary text-white border-2 border-brand-dark font-black uppercase text-[9px] md:text-[10px] flex items-center gap-2 shadow-neo rounded-lg hover:-translate-y-0.5 transition-transform shrink-0"><i class="fa-solid fa-plus"></i> <span class="hidden sm:inline">Tạo Sự Kiện</span></button>` : ''}
                     </div>
                 </div>
 
                 <!-- Calendar Grid Area -->
-                <div class="flex-1 bg-white border-2 border-brand-dark rounded-2xl flex flex-col overflow-hidden shadow-neo-sm">
+                <div class="flex-1 bg-white border-2 border-brand-dark rounded-2xl flex flex-col overflow-hidden shadow-neo-sm w-full">
                     ${renderCalGrid(isAdmin)}
                 </div>
             </div>`;
@@ -709,8 +679,7 @@
             if (STATE.calView === 'YEAR') return `Năm ${d.getFullYear()}`;
             if (STATE.calView === 'MONTH') return `Tháng ${d.getMonth() + 1} - ${d.getFullYear()}`;
             if (STATE.calView === 'WEEK') {
-                const w = getWeekDates(d);
-                return `Tuần ${w[0].getDate()}/${w[0].getMonth()+1} - ${w[6].getDate()}/${w[6].getMonth()+1}`;
+                const w = getWeekDates(d); return `Tuần ${w[0].getDate()}/${w[0].getMonth()+1} - ${w[6].getDate()}/${w[6].getMonth()+1}`;
             }
             return `Ngày ${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`;
         };
@@ -735,48 +704,110 @@
             const view = STATE.calView;
             const visibleEvents = STATE.events.filter(e => isAdmin || e.staffId === STATE.user.id || e.staffId === 'ALL');
 
-            if (view === 'WEEK') {
-                const dates = getWeekDates(STATE.calDate);
-                const days = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
-                
-                return `
-                <div class="grid grid-cols-7 border-b-2 border-brand-dark bg-gray-50 shrink-0">
-                    ${dates.map((d, i) => {
-                        const isToday = formatDate(d) === formatDate(new Date());
-                        return `<div class="py-2 text-center border-r-2 border-brand-dark last:border-r-0 flex flex-col items-center ${isToday ? 'bg-brand-light' : ''}">
-                            <span class="font-black text-[10px] uppercase text-gray-500">${days[i]}</span>
-                            <span class="text-sm font-black w-6 h-6 flex items-center justify-center mt-1 ${isToday ? 'bg-brand-dark text-white rounded-md' : ''}">${d.getDate()}</span>
-                        </div>`;
-                    }).join('')}
-                </div>
-                <div class="flex-1 grid grid-cols-7 overflow-y-auto custom-scrollbar bg-white">
-                    ${dates.map(d => {
-                        const dateStr = formatDate(d);
-                        const dayEvts = visibleEvents.filter(e => e.date === dateStr).sort((a,b) => a.start.localeCompare(b.start));
-                        return `<div onclick="if(event.target===event.currentTarget && ${isAdmin}) window.openEventModal('${dateStr}')" class="border-r-2 border-brand-dark last:border-r-0 p-2 min-h-[300px] cursor-pointer hover:bg-gray-50 flex flex-col gap-2">
-                            ${dayEvts.map(e => `
-                                <div onclick="window.viewEvent('${e.id}')" class="p-2 border-2 border-brand-dark rounded bg-${e.type==='MEETING'?'yellow-100':e.type==='TASK'?'blue-100':'brand-light'} cursor-pointer hover:-translate-y-0.5 transition-transform shadow-sm">
-                                    <div class="text-[9px] font-black uppercase mb-1 bg-white inline-block px-1 rounded border border-brand-dark">${e.start} - ${e.end}</div>
-                                    <div class="text-[11px] font-black leading-tight truncate">${e.title}</div>
-                                    <div class="text-[9px] font-bold mt-1 text-gray-600 truncate">${e.staffId === 'ALL' ? 'Tất cả' : (STATE.users.find(u=>u.id===e.staffId)?.name || 'N/A')}</div>
-                                </div>
-                            `).join('')}
-                        </div>`;
-                    }).join('')}
+            if (view === 'DAY') {
+                const dayEvts = visibleEvents.filter(e => e.date === formatDate(STATE.calDate)).sort((a,b) => a.start.localeCompare(b.start));
+                if(dayEvts.length === 0) return `<div class="flex-1 flex items-center justify-center font-bold text-gray-400 text-sm cursor-pointer hover:bg-gray-50 transition-colors" onclick="if(${isAdmin}) window.openEventModal('${formatDate(STATE.calDate)}')">Nhấn để thêm lịch trình mới.</div>`;
+                return `<div class="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar">
+                    ${dayEvts.map(e => `
+                        <div class="p-3 md:p-4 border-2 border-brand-dark rounded-xl bg-${e.type==='MEETING'?'yellow-100':e.type==='TASK'?'blue-100':'brand-light'} shadow-sm flex flex-col sm:flex-row gap-3 md:gap-4 group">
+                            <div class="font-black text-lg md:text-xl w-full sm:w-24 sm:border-r-2 border-b-2 sm:border-b-0 border-brand-dark flex sm:flex-col items-center sm:items-end sm:justify-center pr-0 sm:pr-4 pb-2 sm:pb-0 gap-2 sm:gap-0">
+                                <span>${e.start}</span><span class="text-xs md:text-sm text-gray-500">${e.end}</span>
+                            </div>
+                            <div class="flex-1 cursor-pointer" onclick="window.viewEvent('${e.id}')">
+                                <div class="text-[9px] md:text-[10px] font-black uppercase mb-1 bg-white inline-block px-2 py-0.5 rounded border border-brand-dark">${EVENT_TYPES[e.type]}</div>
+                                <div class="font-black text-base md:text-lg leading-tight">${e.title}</div>
+                                <div class="text-[10px] md:text-xs font-bold mt-1 text-gray-600">👤 ${e.staffId === 'ALL' ? 'Tất cả' : (STATE.users.find(u=>u.id===e.staffId)?.name || 'N/A')}</div>
+                            </div>
+                            ${isAdmin ? `<button onclick="window.deleteEvent('${e.id}')" class="w-full sm:w-10 h-8 sm:h-10 border-2 border-brand-dark rounded-xl bg-white text-brand-accent hover:bg-brand-accent hover:text-white shrink-0 sm:opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center mt-2 sm:mt-0"><i class="fa-solid fa-trash"></i> <span class="ml-2 text-xs sm:hidden font-black">XÓA</span></button>` : ''}
+                        </div>
+                    `).join('')}
+                    ${isAdmin ? `<div onclick="window.openEventModal('${formatDate(STATE.calDate)}')" class="p-4 border-2 border-dashed border-gray-300 rounded-xl text-center text-gray-400 font-bold cursor-pointer hover:bg-gray-50 hover:border-brand-primary hover:text-brand-primary transition-colors text-sm">+ Thêm lịch trình</div>` : ''}
                 </div>`;
             }
+
+            if (view === 'MONTH') {
+                const year = STATE.calDate.getFullYear(); const month = STATE.calDate.getMonth();
+                const firstDay = new Date(year, month, 1).getDay(); const daysInMonth = new Date(year, month + 1, 0).getDate();
+                const days = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+                
+                let html = `<div class="overflow-x-auto flex-1 flex flex-col hide-scrollbar"><div class="min-w-[600px] flex-1 flex flex-col">`;
+                html += `<div class="grid grid-cols-7 border-b-2 border-brand-dark bg-gray-50 shrink-0">`;
+                days.forEach(d => html += `<div class="py-2 text-center border-r-2 border-brand-dark last:border-r-0 font-black text-[10px] uppercase text-gray-500">${d}</div>`);
+                html += `</div><div class="flex-1 grid grid-cols-7 grid-rows-5 bg-white">`;
+                
+                let dayCount = 1 - firstDay;
+                for (let i = 0; i < 35; i++) {
+                    if (dayCount < 1 || dayCount > daysInMonth) {
+                        html += `<div class="border-r-2 border-b-2 border-brand-dark bg-gray-100/50"></div>`;
+                    } else {
+                        const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(dayCount).padStart(2,'0')}`;
+                        const isToday = dateStr === formatDate(new Date());
+                        const dayEvents = visibleEvents.filter(e => e.date === dateStr);
+                        
+                        html += `<div onclick="if(event.target===event.currentTarget && ${isAdmin}) window.openEventModal('${dateStr}'); else { STATE.calDate = new Date('${dateStr}'); STATE.calView = 'DAY'; renderApp(); }" class="border-r-2 border-b-2 border-brand-dark p-1 cursor-pointer hover:bg-brand-light transition-colors flex flex-col ${isToday ? 'bg-brand-light/50' : ''}">
+                            <div class="text-right mb-1 pointer-events-none"><span class="inline-block w-5 h-5 text-center leading-5 text-[9px] md:text-[10px] font-black ${isToday ? 'bg-brand-dark text-white rounded' : ''}">${dayCount}</span></div>
+                            <div class="flex-1 overflow-y-auto hide-scrollbar space-y-1 pointer-events-none">
+                                ${dayEvents.slice(0,3).map(e => `<div class="text-[7px] md:text-[8px] font-black bg-${e.type==='MEETING'?'yellow-200':e.type==='TASK'?'blue-200':'green-200'} px-1 truncate rounded border border-brand-dark">${e.start} ${e.title}</div>`).join('')}
+                                ${dayEvents.length > 3 ? `<div class="text-[8px] font-black text-gray-500 text-center">+${dayEvents.length - 3}</div>` : ''}
+                            </div>
+                        </div>`;
+                    }
+                    dayCount++;
+                }
+                html += `</div></div></div>`; return html;
+            }
+
+            if (view === 'YEAR') {
+                const year = STATE.calDate.getFullYear();
+                const months = ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6', 'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'];
+                let html = `<div class="flex-1 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 md:gap-4 p-4 overflow-y-auto bg-gray-50 custom-scrollbar">`;
+                months.forEach((m, idx) => {
+                    html += `<div onclick="STATE.calDate = new Date(${year}, ${idx}, 1); STATE.calView = 'MONTH'; renderApp();" class="bg-white border-2 border-brand-dark rounded-xl p-4 flex items-center justify-center cursor-pointer hover:bg-brand-light hover:-translate-y-1 transition-all shadow-sm font-black uppercase tracking-widest text-brand-dark text-xs md:text-sm text-center">${m}</div>`;
+                });
+                html += `</div>`; return html;
+            }
+
+            // WEEK View
+            const dates = getWeekDates(STATE.calDate);
+            const days = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
             
-            return `<div class="flex-1 flex items-center justify-center font-black text-gray-400 uppercase text-lg">Chế độ ${view} đang hiển thị... (Minh họa)</div>`;
+            let weekHtml = `<div class="overflow-x-auto flex-1 flex flex-col hide-scrollbar"><div class="min-w-[700px] flex-1 flex flex-col">`;
+            weekHtml += `<div class="grid grid-cols-7 border-b-2 border-brand-dark bg-gray-50 shrink-0">
+                ${dates.map((d, i) => {
+                    const isToday = formatDate(d) === formatDate(new Date());
+                    return `<div class="py-2 text-center border-r-2 border-brand-dark last:border-r-0 flex flex-col items-center ${isToday ? 'bg-brand-light' : ''}">
+                        <span class="font-black text-[9px] md:text-[10px] uppercase text-gray-500">${days[i]}</span>
+                        <span class="text-xs md:text-sm font-black w-5 h-5 md:w-6 md:h-6 flex items-center justify-center mt-1 ${isToday ? 'bg-brand-dark text-white rounded-md' : ''}">${d.getDate()}</span>
+                    </div>`;
+                }).join('')}
+            </div>
+            <div class="flex-1 grid grid-cols-7 overflow-y-auto custom-scrollbar bg-white">
+                ${dates.map(d => {
+                    const dateStr = formatDate(d);
+                    const dayEvts = visibleEvents.filter(e => e.date === dateStr).sort((a,b) => a.start.localeCompare(b.start));
+                    return `<div onclick="if(event.target===event.currentTarget && ${isAdmin}) window.openEventModal('${dateStr}')" class="border-r-2 border-brand-dark last:border-r-0 p-1 md:p-2 min-h-[300px] cursor-pointer hover:bg-gray-50 flex flex-col gap-2">
+                        ${dayEvts.map(e => `
+                            <div onclick="window.viewEvent('${e.id}')" class="p-1.5 md:p-2 border-2 border-brand-dark rounded bg-${e.type==='MEETING'?'yellow-100':e.type==='TASK'?'blue-100':'brand-light'} cursor-pointer hover:-translate-y-0.5 transition-transform shadow-sm relative group">
+                                <div class="text-[8px] md:text-[9px] font-black uppercase mb-1 bg-white inline-block px-1 rounded border border-brand-dark whitespace-nowrap">${e.start} - ${e.end}</div>
+                                <div class="text-[9px] md:text-[11px] font-black leading-tight line-clamp-2">${e.title}</div>
+                                <div class="text-[8px] md:text-[9px] font-bold mt-1 text-gray-600 truncate">${e.staffId === 'ALL' ? 'Tất cả' : (STATE.users.find(u=>u.id===e.staffId)?.name || 'N/A')}</div>
+                                ${isAdmin ? `<button onclick="event.stopPropagation(); window.deleteEvent('${e.id}')" class="absolute top-1 right-1 w-4 h-4 md:w-5 md:h-5 bg-brand-accent text-white rounded flex items-center justify-center opacity-0 group-hover:opacity-100 text-[8px] md:text-[10px] border border-brand-dark"><i class="fa-solid fa-xmark"></i></button>` : ''}
+                            </div>
+                        `).join('')}
+                    </div>`;
+                }).join('')}
+            </div></div></div>`;
+            return weekHtml;
         };
 
         window.openEventModal = (dateStr = formatDate(new Date())) => {
             const html = `
                 <form onsubmit="window.saveEvent(event)" class="space-y-4">
-                    <div><label class="block text-[10px] font-black uppercase mb-1.5">Tiêu đề / Tên lớp</label><input type="text" id="e_title" class="w-full neo-input p-3 rounded-xl text-sm" required></div>
-                    <div class="grid grid-cols-2 gap-4">
+                    <div><label class="block text-[10px] font-black uppercase mb-1.5">Tiêu đề / Tên lớp / Nhiệm vụ</label><input type="text" id="e_title" class="w-full neo-input p-3 rounded-xl text-sm" required></div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div><label class="block text-[10px] font-black uppercase mb-1.5">Ngày</label><input type="date" id="e_date" value="${dateStr}" class="w-full neo-input p-3 rounded-xl text-sm" required></div>
                         <div>
-                            <label class="block text-[10px] font-black uppercase mb-1.5">Loại</label>
+                            <label class="block text-[10px] font-black uppercase mb-1.5">Phân Loại</label>
                             <select id="e_type" class="w-full neo-input p-3 rounded-xl text-sm bg-white">
                                 ${Object.entries(EVENT_TYPES).map(([k,v]) => `<option value="${k}">${v}</option>`).join('')}
                             </select>
@@ -785,14 +816,14 @@
                         <div><label class="block text-[10px] font-black uppercase mb-1.5">Giờ Kết Thúc</label><input type="time" id="e_end" class="w-full neo-input p-3 rounded-xl text-sm" required></div>
                     </div>
                     <div>
-                        <label class="block text-[10px] font-black uppercase mb-1.5">Gán cho Nhân Sự</label>
+                        <label class="block text-[10px] font-black uppercase mb-1.5">Phân công cho (Giáo viên/Trợ giảng)</label>
                         <select id="e_staff" class="w-full neo-input p-3 rounded-xl text-sm bg-white">
-                            <option value="ALL">Tất cả nhân sự (Họp chung)</option>
+                            <option value="ALL">Tất cả nhân sự (Họp chung/Sự kiện chung)</option>
                             ${STATE.users.filter(u=>u.type!=='ADMIN').map(u => `<option value="${u.id}">${u.name} (${u.username})</option>`).join('')}
                         </select>
                     </div>
-                    <div><label class="block text-[10px] font-black uppercase mb-1.5">Nội dung chi tiết</label><textarea id="e_desc" class="w-full neo-input p-3 rounded-xl text-sm h-24"></textarea></div>
-                    <button type="submit" class="w-full bg-brand-dark text-white font-black uppercase py-4 neo-btn rounded-xl shadow-neo mt-4">Thêm Vào Lịch</button>
+                    <div><label class="block text-[10px] font-black uppercase mb-1.5">Hướng dẫn / Nội dung chi tiết</label><textarea id="e_desc" class="w-full neo-input p-3 rounded-xl text-sm h-24" placeholder="Nhập ghi chú, link tài liệu hoặc yêu cầu chuẩn bị..."></textarea></div>
+                    <button type="submit" class="w-full bg-brand-dark text-white font-black uppercase py-4 neo-btn rounded-xl shadow-neo mt-4">Lưu Sự Kiện / Lịch</button>
                 </form>
             `;
             openModal('Tạo Lịch / Sự Kiện Mới', html);
@@ -807,40 +838,38 @@
                 desc: document.getElementById('e_desc').value.trim()
             };
             try {
-                if(STATE.isOnline) await addDoc(collection(STATE.db, 'events'), data);
+                if(STATE.isOnline && STATE.db) await addDoc(collection(STATE.db, 'artifacts', appId, 'public', 'data', 'events'), data);
                 else { STATE.events.push({ id: 'e'+Date.now(), ...data}); localStorage.setItem('chem_events', JSON.stringify(STATE.events)); }
-                showToast('Thêm lịch thành công'); closeModal(); renderApp();
+                showToast('Đã lưu lịch thành công'); closeModal(); renderApp();
             } catch(err) { showToast('Lỗi lưu lịch', 'ERROR'); }
         };
 
         window.viewEvent = (id) => {
-            const ev = STATE.events.find(x => x.id === id);
-            if(!ev) return;
+            const ev = STATE.events.find(x => x.id === id); if(!ev) return;
             const staffName = ev.staffId === 'ALL' ? 'Toàn bộ nhân sự' : (STATE.users.find(u=>u.id===ev.staffId)?.name || ev.staffId);
             const html = `
                 <div class="space-y-4">
                     <div class="bg-brand-light border-2 border-brand-dark p-4 rounded-xl text-center">
                         <span class="px-2 py-1 text-[10px] font-black uppercase bg-white border border-brand-dark rounded mb-2 inline-block">${EVENT_TYPES[ev.type]}</span>
-                        <h2 class="text-2xl font-black uppercase text-brand-dark">${ev.title}</h2>
+                        <h2 class="text-xl md:text-2xl font-black uppercase text-brand-dark break-words">${ev.title}</h2>
                     </div>
                     <div class="grid grid-cols-2 gap-4">
-                        <div class="border-2 border-brand-dark p-4 rounded-xl bg-gray-50"><p class="text-[10px] font-black text-gray-500 uppercase mb-1">Ngày</p><p class="font-bold text-lg">${getFormatDisplay(ev.date)}</p></div>
-                        <div class="border-2 border-brand-dark p-4 rounded-xl bg-gray-50"><p class="text-[10px] font-black text-gray-500 uppercase mb-1">Thời gian</p><p class="font-bold text-lg">${ev.start} - ${ev.end}</p></div>
+                        <div class="border-2 border-brand-dark p-3 md:p-4 rounded-xl bg-gray-50"><p class="text-[9px] md:text-[10px] font-black text-gray-500 uppercase mb-1">Ngày</p><p class="font-bold text-sm md:text-lg">${getFormatDisplay(ev.date)}</p></div>
+                        <div class="border-2 border-brand-dark p-3 md:p-4 rounded-xl bg-gray-50"><p class="text-[9px] md:text-[10px] font-black text-gray-500 uppercase mb-1">Thời gian</p><p class="font-bold text-sm md:text-lg">${ev.start} - ${ev.end}</p></div>
                     </div>
-                    <div class="border-2 border-brand-dark p-4 rounded-xl bg-white"><p class="text-[10px] font-black text-gray-500 uppercase mb-1">Phân công cho</p><p class="font-bold">${staffName}</p></div>
-                    ${ev.desc ? `<div class="border-2 border-brand-dark p-4 rounded-xl bg-yellow-50"><p class="text-[10px] font-black text-gray-500 uppercase mb-1">Nội dung chi tiết</p><p class="text-sm font-medium whitespace-pre-wrap">${ev.desc}</p></div>` : ''}
-                    ${STATE.user.role === 'ADMIN' ? `<button onclick="window.deleteEvent('${id}')" class="w-full bg-brand-accent text-white font-black uppercase py-3 neo-btn rounded-xl mt-4"><i class="fa-solid fa-trash mr-2"></i>Xóa Lịch Này</button>` : ''}
+                    <div class="border-2 border-brand-dark p-4 rounded-xl bg-white"><p class="text-[10px] font-black text-gray-500 uppercase mb-1">Phân công cho</p><p class="font-bold text-sm">${staffName}</p></div>
+                    ${ev.desc ? `<div class="border-2 border-brand-dark p-4 rounded-xl bg-yellow-50"><p class="text-[10px] font-black text-gray-500 uppercase mb-1">Nội dung chi tiết</p><p class="text-xs md:text-sm font-medium whitespace-pre-wrap">${ev.desc}</p></div>` : ''}
                 </div>
             `;
-            openModal('Chi Tiết Phân Công', html);
+            openModal('Chi Tiết Lịch', html);
         };
 
         window.deleteEvent = async (id) => {
             if(confirm('Xóa sự kiện này khỏi lịch?')) {
                 try {
-                    if(STATE.isOnline) await deleteDoc(doc(STATE.db, 'events', id));
+                    if(STATE.isOnline && STATE.db) await deleteDoc(doc(STATE.db, 'artifacts', appId, 'public', 'data', 'events', id));
                     else { STATE.events = STATE.events.filter(x => x.id !== id); localStorage.setItem('chem_events', JSON.stringify(STATE.events)); }
-                    showToast('Đã xóa sự kiện'); closeModal(); renderApp();
+                    showToast('Đã xóa sự kiện'); renderApp();
                 } catch(e) { showToast('Lỗi xóa', 'ERROR'); }
             }
         };
@@ -853,37 +882,39 @@
             const pct = visibleTasks.length ? Math.round((done.length/visibleTasks.length)*100) : 0;
 
             const renderCard = (t) => `
-                <div class="bg-white border-2 border-brand-dark p-4 rounded-xl shadow-sm hover:shadow-neo transition-all flex flex-col group mb-3">
-                    <h4 class="font-black text-sm uppercase leading-tight mb-2">${t.title}</h4>
-                    <p class="text-[10px] font-bold text-gray-500 mb-2"><i class="fa-regular fa-clock mr-1"></i> Hạn: ${getFormatDisplay(t.deadline)}</p>
-                    <div class="text-xs font-medium text-gray-600 bg-gray-50 p-2 rounded border border-gray-200 line-clamp-2 mb-3">${t.desc}</div>
+                <div class="bg-white border-2 border-brand-dark p-3 md:p-4 rounded-xl shadow-sm hover:shadow-neo transition-all flex flex-col group mb-3">
+                    <div class="flex justify-between items-start mb-2">
+                        <h4 class="font-black text-xs md:text-sm uppercase leading-tight pr-4 line-clamp-2">${t.title}</h4>
+                        ${isAdmin ? `<button onclick="window.deleteTask('${t.id}')" class="text-brand-accent hover:bg-brand-accent hover:text-white rounded px-1.5 py-0.5 border border-transparent hover:border-brand-dark transition-colors md:opacity-0 group-hover:opacity-100"><i class="fa-solid fa-trash"></i></button>` : ''}
+                    </div>
+                    <p class="text-[9px] md:text-[10px] font-bold text-gray-500 mb-2"><i class="fa-regular fa-clock mr-1"></i> Hạn: ${getFormatDisplay(t.deadline)}</p>
+                    <div class="text-[10px] md:text-xs font-medium text-gray-600 bg-gray-50 p-2 rounded border border-gray-200 line-clamp-3 mb-3" title="${t.desc}">${t.desc}</div>
                     <div class="flex gap-2 mt-auto">
-                        ${t.status !== 'TODO' ? `<button onclick="window.updateTask('${t.id}', 'TODO')" class="flex-1 py-1.5 text-[9px] font-black uppercase border-2 border-brand-dark rounded hover:bg-gray-100 bg-white">Cần Làm</button>` : ''}
-                        ${t.status !== 'DOING' ? `<button onclick="window.updateTask('${t.id}', 'DOING')" class="flex-1 py-1.5 text-[9px] font-black uppercase border-2 border-brand-dark rounded bg-brand-primary text-white hover:bg-emerald-600">Đang Làm</button>` : ''}
-                        ${t.status !== 'DONE' ? `<button onclick="window.updateTask('${t.id}', 'DONE')" class="flex-1 py-1.5 text-[9px] font-black uppercase border-2 border-brand-dark rounded bg-brand-dark text-white hover:bg-gray-800">Hoàn Thành</button>` : ''}
-                        ${isAdmin ? `<button onclick="window.deleteTask('${t.id}')" class="w-8 border-2 border-brand-dark rounded bg-white text-brand-accent hover:bg-brand-accent hover:text-white flex items-center justify-center"><i class="fa-solid fa-trash"></i></button>` : ''}
+                        ${t.status !== 'TODO' ? `<button onclick="window.updateTask('${t.id}', 'TODO')" class="flex-1 py-1.5 text-[8px] md:text-[9px] font-black uppercase border-2 border-brand-dark rounded hover:bg-gray-100 bg-white">Cần Làm</button>` : ''}
+                        ${t.status !== 'DOING' ? `<button onclick="window.updateTask('${t.id}', 'DOING')" class="flex-1 py-1.5 text-[8px] md:text-[9px] font-black uppercase border-2 border-brand-dark rounded bg-brand-primary text-white hover:bg-emerald-600">Đang Làm</button>` : ''}
+                        ${t.status !== 'DONE' ? `<button onclick="window.updateTask('${t.id}', 'DONE')" class="flex-1 py-1.5 text-[8px] md:text-[9px] font-black uppercase border-2 border-brand-dark rounded bg-brand-dark text-white hover:bg-gray-800">Hoàn Thành</button>` : ''}
                     </div>
                 </div>
             `;
 
             return `
-            <div class="h-full flex flex-col fade-in max-w-6xl mx-auto relative">
-                <div class="flex justify-between items-center mb-4 shrink-0">
-                    <h2 class="text-2xl font-black uppercase tracking-tight text-brand-dark">QUẢN LÝ CÔNG VIỆC</h2>
-                    <div class="flex gap-3">
-                        <button class="px-4 py-2 bg-white border-2 border-brand-dark rounded-xl font-black text-[10px] uppercase shadow-sm flex items-center gap-2"><i class="fa-solid fa-box-archive"></i> Đã Xong (${done.length}) - ${pct}%</button>
-                        ${isAdmin ? `<button onclick="window.openTaskModal()" class="px-4 py-2 bg-brand-dark text-white border-2 border-brand-dark rounded-xl font-black text-[10px] uppercase neo-btn flex items-center gap-2"><i class="fa-solid fa-plus"></i> Giao Việc</button>` : ''}
+            <div class="h-full flex flex-col fade-in max-w-6xl mx-auto relative w-full">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 shrink-0 gap-3">
+                    <h2 class="text-xl md:text-2xl font-black uppercase tracking-tight text-brand-dark">QUẢN LÝ CÔNG VIỆC</h2>
+                    <div class="flex flex-wrap gap-2 md:gap-3 w-full sm:w-auto">
+                        <button class="flex-1 sm:flex-none justify-center px-3 md:px-4 py-2 bg-brand-dark text-white border-2 border-brand-dark rounded-xl font-black text-[9px] md:text-[10px] uppercase shadow-neo-sm flex items-center gap-2 whitespace-nowrap"><i class="fa-solid fa-box-archive"></i> Đã Xong (${done.length}) - ${pct}%</button>
+                        ${isAdmin ? `<button onclick="window.openTaskModal()" class="flex-1 sm:flex-none justify-center px-3 md:px-4 py-2 bg-brand-primary text-white border-2 border-brand-dark rounded-xl font-black text-[9px] md:text-[10px] uppercase neo-btn flex items-center gap-2 whitespace-nowrap"><i class="fa-solid fa-plus"></i> Giao Việc</button>` : ''}
                     </div>
                 </div>
 
-                <div class="flex-1 flex gap-6 min-h-0">
-                    <div class="flex-1 flex flex-col bg-gray-100 border-2 border-brand-dark rounded-2xl p-4 shadow-inner">
-                        <h3 class="font-black uppercase text-sm mb-4 bg-white p-2 rounded-lg border-2 border-brand-dark text-center shadow-sm">CẦN LÀM (${todo.length})</h3>
-                        <div class="flex-1 overflow-y-auto custom-scrollbar pr-2">${todo.map(renderCard).join('')}</div>
+                <div class="flex-1 flex flex-col md:flex-row gap-4 md:gap-6 min-h-0 overflow-y-auto md:overflow-hidden">
+                    <div class="flex-none md:flex-1 flex flex-col bg-gray-100 border-2 border-brand-dark rounded-2xl p-3 md:p-4 shadow-inner min-h-[300px] md:min-h-0">
+                        <h3 class="font-black uppercase text-xs md:text-sm mb-3 md:mb-4 bg-white p-2 rounded-lg border-2 border-brand-dark text-center shadow-sm">CẦN LÀM (${todo.length})</h3>
+                        <div class="flex-1 overflow-y-auto custom-scrollbar pr-1 md:pr-2 space-y-3">${todo.map(renderCard).join('')}</div>
                     </div>
-                    <div class="flex-1 flex flex-col bg-brand-light border-2 border-brand-dark rounded-2xl p-4 shadow-inner">
-                        <h3 class="font-black uppercase text-sm mb-4 bg-white p-2 rounded-lg border-2 border-brand-dark text-center shadow-sm border-b-4 border-b-brand-primary">ĐANG LÀM (${doing.length})</h3>
-                        <div class="flex-1 overflow-y-auto custom-scrollbar pr-2">${doing.map(renderCard).join('')}</div>
+                    <div class="flex-none md:flex-1 flex flex-col bg-brand-light border-2 border-brand-dark rounded-2xl p-3 md:p-4 shadow-inner min-h-[300px] md:min-h-0">
+                        <h3 class="font-black uppercase text-xs md:text-sm mb-3 md:mb-4 bg-white p-2 rounded-lg border-2 border-brand-dark text-center shadow-sm border-b-4 border-b-brand-primary">ĐANG LÀM (${doing.length})</h3>
+                        <div class="flex-1 overflow-y-auto custom-scrollbar pr-1 md:pr-2 space-y-3">${doing.map(renderCard).join('')}</div>
                     </div>
                 </div>
             </div>`;
@@ -893,8 +924,8 @@
             const html = `
                 <form onsubmit="window.saveTask(event)" class="space-y-4">
                     <div><label class="block text-[10px] font-black uppercase mb-1.5">Tiêu đề công việc</label><input type="text" id="t_title" class="w-full neo-input p-3 rounded-xl text-sm" required></div>
-                    <div><label class="block text-[10px] font-black uppercase mb-1.5">Hướng dẫn chi tiết</label><textarea id="t_desc" class="w-full neo-input p-3 rounded-xl text-sm h-32" required></textarea></div>
-                    <div class="grid grid-cols-2 gap-4">
+                    <div><label class="block text-[10px] font-black uppercase mb-1.5">Hướng dẫn chi tiết cụ thể</label><textarea id="t_desc" class="w-full neo-input p-3 rounded-xl text-sm h-32" required></textarea></div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div><label class="block text-[10px] font-black uppercase mb-1.5">Hạn Chót</label><input type="date" id="t_deadline" class="w-full neo-input p-3 rounded-xl text-sm" required></div>
                         <div>
                             <label class="block text-[10px] font-black uppercase mb-1.5">Giao cho</label>
@@ -913,14 +944,14 @@
             e.preventDefault();
             const data = { title: document.getElementById('t_title').value.trim(), desc: document.getElementById('t_desc').value.trim(), deadline: document.getElementById('t_deadline').value, assignee: document.getElementById('t_staff').value, status: 'TODO' };
             try {
-                if(STATE.isOnline) await addDoc(collection(STATE.db, 'tasks'), data);
+                if(STATE.isOnline && STATE.db) await addDoc(collection(STATE.db, 'artifacts', appId, 'public', 'data', 'tasks'), data);
                 else { STATE.tasks.push({ id: 't'+Date.now(), ...data}); localStorage.setItem('chem_tasks', JSON.stringify(STATE.tasks)); }
                 showToast('Đã giao việc'); closeModal(); renderApp();
             } catch(err) { showToast('Lỗi', 'ERROR'); }
         };
         window.updateTask = async (id, status) => {
             try {
-                if(STATE.isOnline) await updateDoc(doc(STATE.db, 'tasks', id), { status });
+                if(STATE.isOnline && STATE.db) await updateDoc(doc(STATE.db, 'artifacts', appId, 'public', 'data', 'tasks', id), { status });
                 else { const idx = STATE.tasks.findIndex(x=>x.id===id); if(idx!==-1) STATE.tasks[idx].status = status; localStorage.setItem('chem_tasks', JSON.stringify(STATE.tasks)); }
                 renderApp();
             } catch(err) { showToast('Lỗi', 'ERROR'); }
@@ -928,7 +959,7 @@
         window.deleteTask = async (id) => {
             if(confirm('Xóa công việc này?')) {
                 try {
-                    if(STATE.isOnline) await deleteDoc(doc(STATE.db, 'tasks', id));
+                    if(STATE.isOnline && STATE.db) await deleteDoc(doc(STATE.db, 'artifacts', appId, 'public', 'data', 'tasks', id));
                     else { STATE.tasks = STATE.tasks.filter(x=>x.id!==id); localStorage.setItem('chem_tasks', JSON.stringify(STATE.tasks)); }
                     renderApp();
                 } catch(e) {}
@@ -936,186 +967,281 @@
         };
 
         const renderAttendanceModule = (isAdmin) => {
+            const viewTab = STATE.attTab || 'QR';
+            
             if (isAdmin) {
                 return `
-                <div class="max-w-4xl mx-auto h-full flex flex-col fade-in">
-                    <h2 class="text-2xl font-black uppercase mb-6 shrink-0 border-b-2 border-brand-dark pb-2 text-brand-dark">Tạo Phiên Chấm Công QR</h2>
-                    <div class="flex gap-8 flex-1 min-h-0 flex-col md:flex-row">
-                        <div class="flex-1 bg-white border-2 border-brand-dark rounded-2xl p-6 shadow-neo-sm flex flex-col space-y-5">
-                            <div>
-                                <label class="block text-[10px] font-black uppercase text-gray-500 mb-1.5">Mã QR Code (Nhập tay hoặc Random)</label>
-                                <input type="text" id="qr_code_input" class="w-full border-2 border-brand-dark rounded-xl p-4 font-black text-xl text-center tracking-widest bg-gray-50 outline-none focus:border-brand-primary" placeholder="VD: CHEM-MORNING">
-                            </div>
-                            <div class="grid grid-cols-2 gap-4">
-                                <div><label class="block text-[10px] font-black uppercase text-gray-500 mb-1.5">Mở từ (Giờ)</label><input type="time" id="qr_start" class="w-full neo-input rounded-xl p-3 text-sm"></div>
-                                <div><label class="block text-[10px] font-black uppercase text-gray-500 mb-1.5">Đóng lúc (Giờ)</label><input type="time" id="qr_end" class="w-full neo-input rounded-xl p-3 text-sm"></div>
-                            </div>
-                            <div>
-                                <label class="block text-[10px] font-black uppercase text-gray-500 mb-1.5">Dành cho (Chọn nhân sự)</label>
-                                <select id="qr_staff" class="w-full neo-input rounded-xl p-3 text-sm bg-white">
-                                    <option value="ALL">Tất cả Giáo viên/Trợ giảng</option>
-                                    ${STATE.users.filter(u=>u.type!=='ADMIN').map(u => `<option value="${u.name}">${u.name}</option>`).join('')}
-                                </select>
-                            </div>
-                            <button onclick="window.generateAdminQR()" class="w-full py-4 border-2 border-brand-dark rounded-xl font-black uppercase bg-brand-primary text-white hover:-translate-y-1 transition-transform shadow-neo mt-auto">PHÁT HÀNH MÃ QR</button>
-                        </div>
-                        <div class="w-full md:w-[350px] shrink-0 bg-gray-50 border-2 border-brand-dark rounded-2xl p-6 flex flex-col items-center justify-center relative shadow-inner">
-                            <h3 class="font-black text-xs uppercase mb-4 text-gray-500">Mã Hiển Thị Cho Giáo Viên</h3>
-                            <div id="qrcode-display" class="bg-white p-4 border-2 border-brand-dark rounded-xl shadow-sm mb-4 min-h-[200px] flex items-center justify-center">
-                                <span class="text-gray-300 font-black uppercase text-center text-sm">Chưa có mã</span>
-                            </div>
-                            <p id="qr-text-display" class="font-black text-2xl uppercase tracking-widest text-center text-brand-dark">---</p>
-                            <p class="text-[9px] font-bold text-gray-400 mt-2 text-center">Giáo viên dùng Web hoặc Zalo quét để chuyển đến giao diện Gửi Xác Nhận.</p>
+                <div class="max-w-6xl mx-auto h-full flex flex-col fade-in w-full">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 shrink-0 border-b-2 border-brand-dark pb-3 gap-4">
+                        <h2 class="text-xl md:text-2xl font-black uppercase text-brand-dark tracking-tight">QUẢN LÝ CHUYÊN CẦN & QR</h2>
+                        <div class="flex border-2 border-brand-dark rounded-lg overflow-hidden bg-gray-50 text-[9px] md:text-[10px] font-black uppercase w-full sm:w-auto">
+                            <button onclick="STATE.attTab='QR'; renderApp()" class="flex-1 sm:flex-none px-4 md:px-6 py-2.5 md:py-3 ${viewTab==='QR'?'bg-brand-dark text-white':'text-gray-500 hover:bg-gray-200'}">Tạo Phiên QR</button>
+                            <button onclick="STATE.attTab='MONITOR'; renderApp()" class="flex-1 sm:flex-none px-4 md:px-6 py-2.5 md:py-3 border-l-2 border-brand-dark ${viewTab==='MONITOR'?'bg-brand-dark text-white':'text-gray-500 hover:bg-gray-200'}">Giám Sát Chuyên Cần</button>
                         </div>
                     </div>
+                    
+                    ${viewTab === 'QR' ? `
+                    <div class="flex gap-6 md:gap-8 flex-1 min-h-0 flex-col md:flex-row">
+                        <div class="flex-1 bg-white border-2 border-brand-dark rounded-2xl p-4 md:p-6 shadow-neo-sm flex flex-col space-y-4 overflow-y-auto custom-scrollbar">
+                            <h3 class="font-black uppercase text-sm border-b border-gray-200 pb-2">THIẾT LẬP MÃ QUÉT</h3>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div><label class="block text-[10px] font-black uppercase mb-1 text-gray-600">Mã Lớp Dạy</label><input type="text" id="qr_class" class="w-full neo-input rounded-xl p-3 text-sm" placeholder="VD: 12A1"></div>
+                                <div><label class="block text-[10px] font-black uppercase mb-1 text-gray-600">Mã Ca (Code)</label><input type="text" id="qr_code" class="w-full neo-input rounded-xl p-3 text-sm font-black text-brand-primary" placeholder="Tự nhập hoặc hệ thống tạo"></div>
+                                <div><label class="block text-[10px] font-black uppercase mb-1 text-gray-600">Dành cho Giáo viên</label>
+                                    <select id="qr_staff" class="w-full neo-input rounded-xl p-3 text-sm bg-white">
+                                        <option value="ALL">Tất cả giáo viên</option>
+                                        ${STATE.users.filter(u=>u.type!=='ADMIN').map(u => `<option value="${u.name}">${u.name}</option>`).join('')}
+                                    </select>
+                                </div>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div><label class="block text-[10px] font-black uppercase mb-1 text-gray-600">Giờ Bắt Đầu</label><input type="time" id="qr_start" class="w-full neo-input rounded-xl p-3 text-sm"></div>
+                                    <div><label class="block text-[10px] font-black uppercase mb-1 text-gray-600">Giờ Kết Thúc</label><input type="time" id="qr_end" class="w-full neo-input rounded-xl p-3 text-sm"></div>
+                                </div>
+                            </div>
+                            <div class="flex flex-col sm:flex-row gap-3 mt-4">
+                                <button onclick="window.generateAdminQR('MANUAL')" class="flex-1 py-3 md:py-4 border-2 border-brand-dark rounded-xl font-black text-[10px] md:text-xs uppercase bg-white hover:bg-gray-100 transition-colors shadow-sm">Tạo Mã Cố Định</button>
+                                <button onclick="window.generateAdminQR('AUTO')" class="flex-1 py-3 md:py-4 border-2 border-brand-dark rounded-xl font-black text-[10px] md:text-xs uppercase bg-brand-primary text-white hover:bg-emerald-600 transition-colors shadow-neo">Bật Tự Động (15s/lần)</button>
+                            </div>
+                        </div>
+                        <div class="w-full md:w-[350px] shrink-0 bg-gray-50 border-2 border-brand-dark rounded-2xl p-6 flex flex-col items-center justify-center relative shadow-inner">
+                            ${STATE.qrInterval ? '<div class="absolute top-4 right-4 w-3 h-3 bg-red-500 rounded-full animate-pulse" title="Đang tự động đổi mã"></div>' : ''}
+                            <h3 class="font-black text-xs uppercase mb-4 text-gray-500">Mã Hiện Tại</h3>
+                            <div id="qrcode-display" class="bg-white p-4 border-2 border-brand-dark rounded-xl shadow-sm mb-4 min-h-[160px] md:min-h-[200px] flex items-center justify-center w-[160px] h-[160px] md:w-[200px] md:h-[200px]">
+                                ${STATE.qrSession ? '' : '<span class="text-gray-300 font-black uppercase text-center text-xs">Chưa có mã</span>'}
+                            </div>
+                            <p id="qr-text-display" class="font-black text-xl md:text-2xl uppercase tracking-widest text-center text-brand-dark">${STATE.qrSession ? STATE.qrSession.code : '---'}</p>
+                            ${STATE.qrSession ? `<p class="text-[10px] font-bold text-gray-500 mt-2 uppercase bg-gray-200 px-2 py-1 rounded">Có hiệu lực: ${STATE.qrSession.start || '---'} đến ${STATE.qrSession.end || '---'}</p>` : ''}
+                        </div>
+                    </div>` : `
+                    <div class="flex-1 overflow-y-auto custom-scrollbar space-y-3 bg-white border-2 border-brand-dark rounded-2xl p-4 shadow-sm w-full">
+                        ${STATE.attendanceRecords.length === 0 ? '<p class="text-center font-bold text-gray-400 mt-10">Chưa có bản ghi chấm công nào.</p>' : ''}
+                        ${STATE.attendanceRecords.sort((a,b)=>b.timestamp - a.timestamp).map(r => `
+                            <div class="border-2 border-brand-dark rounded-xl p-3 md:p-4 bg-gray-50 flex flex-col sm:flex-row justify-between items-start sm:items-center group gap-3">
+                                <div>
+                                    <h4 class="font-black text-sm uppercase">${r.staffName} <span class="text-[9px] md:text-[10px] text-gray-600 normal-case bg-gray-200 px-2 py-0.5 rounded border border-gray-300 ml-2">Lớp: ${r.classCode}</span></h4>
+                                    <p class="text-[10px] md:text-xs font-bold text-gray-600 mt-1">Ghi nhận lúc: ${r.timeStr}</p>
+                                    <div class="text-[10px] font-black text-brand-primary mt-1 border bg-white inline-block px-2 py-0.5 rounded">Mã xác thực: ${r.adminCode}</div>
+                                </div>
+                                <button onclick="window.deleteAttendance('${r.id}')" class="w-full sm:w-8 h-8 bg-white border-2 border-brand-dark rounded-lg text-brand-accent flex items-center justify-center sm:opacity-0 group-hover:opacity-100 transition-opacity hover:bg-brand-accent hover:text-white shrink-0"><i class="fa-solid fa-trash"></i> <span class="ml-2 text-xs font-black sm:hidden">Xóa</span></button>
+                            </div>
+                        `).join('')}
+                    </div>
+                    `}
                 </div>`;
             } else {
                 return `
-                <div class="max-w-xl mx-auto mt-10 fade-in">
-                    <div class="bg-white border-2 border-brand-dark rounded-3xl p-10 text-center shadow-neo">
-                        <div class="w-20 h-20 mx-auto bg-brand-light border-2 border-brand-dark rounded-full flex items-center justify-center mb-6 shadow-inner">
-                            <i class="fa-solid fa-qrcode text-3xl text-brand-primary"></i>
+                <div class="max-w-2xl mx-auto mt-4 md:mt-10 fade-in w-full px-2">
+                    <div class="bg-white border-2 border-brand-dark rounded-3xl p-6 md:p-8 text-center shadow-neo">
+                        <div class="w-16 h-16 md:w-20 md:h-20 mx-auto bg-brand-light border-2 border-brand-dark rounded-full flex items-center justify-center mb-6 shadow-inner">
+                            <i class="fa-solid fa-qrcode text-2xl md:text-3xl text-brand-primary"></i>
                         </div>
-                        <h2 class="text-2xl font-black uppercase mb-3 text-brand-dark">Xác Nhận Chấm Công</h2>
-                        <p class="text-xs font-bold text-gray-500 mb-8 px-4 leading-relaxed">Sử dụng Camera quét mã QR do Admin cấp, hoặc tự nhập mã Code dưới đây để hệ thống tự động soạn thư gửi quản lý.</p>
+                        <h2 class="text-xl md:text-2xl font-black uppercase mb-3 text-brand-dark tracking-tight">Xác Nhận Chấm Công</h2>
+                        <p class="text-[10px] md:text-xs font-bold text-gray-500 mb-6 md:mb-8 px-2 md:px-4 leading-relaxed">Nhập mã Code do Admin cấp trên màn hình hoặc máy chiếu để xác nhận ca dạy. Hệ thống sẽ ghi nhận và tự động tạo Form Mail gửi Quản lý.</p>
                         
-                        <div class="bg-gray-50 p-6 border-2 border-brand-dark rounded-2xl">
-                            <label class="block text-[10px] font-black uppercase text-gray-500 mb-2 text-left">NHẬP MÃ CODE TỪ ADMIN</label>
-                            <div class="flex gap-2">
-                                <input type="text" id="staff_manual_code" class="flex-1 border-2 border-brand-dark rounded-xl px-4 py-3 font-black text-lg tracking-widest bg-white uppercase outline-none focus:border-brand-primary" placeholder="VD: CHEM123" />
-                                <button onclick="window.submitStaffQR()" class="px-6 bg-brand-dark border-2 border-brand-dark rounded-xl text-white font-black uppercase hover:bg-brand-primary transition-colors neo-btn"><i class="fa-solid fa-paper-plane"></i></button>
-                            </div>
+                        <div class="bg-brand-bg p-4 md:p-6 border-2 border-brand-dark rounded-2xl space-y-4 text-left shadow-inner">
+                            <h3 class="font-black text-[10px] uppercase text-gray-600 mb-2 border-b-2 border-brand-dark pb-2">NHẬP MÃ BÁO CÁO</h3>
+                            <div><label class="block text-[10px] font-black uppercase mb-1">Mã Lớp Dạy</label><input type="text" id="s_class" class="w-full neo-input rounded-xl p-3 md:p-4 text-sm font-bold" placeholder="VD: 12A1"></div>
+                            <div><label class="block text-[10px] font-black uppercase mb-1">Mã Code (Do Admin cấp)</label><input type="text" id="s_code" class="w-full neo-input rounded-xl p-3 md:p-4 text-sm md:text-base font-black text-brand-primary uppercase tracking-widest text-center" placeholder="NHẬP MÃ CODE"></div>
+                            
+                            <button onclick="window.submitStaffAttendance()" class="w-full py-4 bg-brand-dark border-2 border-brand-dark rounded-xl text-white font-black text-xs md:text-sm uppercase hover:bg-brand-primary transition-colors shadow-neo mt-4 flex items-center justify-center gap-2"><i class="fa-solid fa-paper-plane"></i> GHI NHẬN & TẠO MAIL BÁO CÁO</button>
                         </div>
                     </div>
                 </div>`;
             }
         };
 
-        const initQRCode = () => { window.qrcodeInstance = null; };
-        
-        window.generateAdminQR = () => {
-            const code = document.getElementById('qr_code_input').value.trim() || 'CHEM-' + Math.floor(Math.random()*10000);
+        window.generateAdminQR = (mode) => {
+            if(STATE.qrInterval) { clearInterval(STATE.qrInterval); STATE.qrInterval = null; }
+            
+            const classCode = document.getElementById('qr_class').value || 'ALL';
             const staff = document.getElementById('qr_staff').value;
-            document.getElementById('qr_code_input').value = code;
+            const start = document.getElementById('qr_start').value || '00:00';
+            const end = document.getElementById('qr_end').value || '23:59';
             
-            // Mailto logic for QR data
-            const subject = encodeURIComponent(`[XÁC NHẬN CHẤM CÔNG] - Mã: ${code}`);
-            const body = encodeURIComponent(`Admin duyệt công giúp tôi.\nMã phiên: ${code}\nThời gian quét: ${new Date().toLocaleString('vi-VN')}\n`);
-            const mailtoLink = `mailto:${BRAND.adminEmail}?subject=${subject}&body=${body}`;
+            const updateQR = () => {
+                const code = mode === 'MANUAL' ? (document.getElementById('qr_code').value || 'CHEM-' + Math.floor(Math.random()*10000)) : 'CHEM-' + Math.floor(Math.random()*100000);
+                const session = { classCode, code, staff, start, end, date: formatDate(new Date()) };
+                STATE.qrSession = session;
+                
+                const container = document.getElementById('qrcode-display');
+                container.innerHTML = '';
+                new QRCode(container, { text: `CODE:${session.code}|CLASS:${session.classCode}`, width: container.clientWidth > 0 ? container.clientWidth : 160, height: container.clientHeight > 0 ? container.clientHeight : 160, colorDark: "#0f172a", colorLight: "#ffffff" });
+                document.getElementById('qr-text-display').innerText = session.code;
+            };
 
-            const container = document.getElementById('qrcode-display');
-            container.innerHTML = '';
-            new QRCode(container, { text: mailtoLink, width: 180, height: 180, colorDark: "#0f172a", colorLight: "#ffffff" });
-            document.getElementById('qr-text-display').innerText = code;
-            showToast('Đã phát hành QR Code');
+            updateQR();
+            if(mode === 'AUTO') { STATE.qrInterval = setInterval(updateQR, 15000); showToast('Đã bật tạo mã tự động 15s'); }
+            else showToast('Đã tạo mã cố định');
+            
+            renderApp();
+            
+            // Re-render QR after DOM update
+            setTimeout(() => { if(STATE.qrSession) { const c = document.getElementById('qrcode-display'); c.innerHTML=''; new QRCode(c, { text: `CODE:${STATE.qrSession.code}|CLASS:${STATE.qrSession.classCode}`, width: c.clientWidth, height: c.clientHeight, colorDark: "#0f172a", colorLight: "#ffffff" }); } }, 50);
         };
 
-        window.submitStaffQR = () => {
-            const code = document.getElementById('staff_manual_code').value.trim();
-            if(!code) return showToast('Vui lòng nhập mã code', 'WARNING');
+        window.submitStaffAttendance = async () => {
+            const classCode = document.getElementById('s_class').value.trim();
+            const adminCode = document.getElementById('s_code').value.trim().toUpperCase();
             
-            const subject = encodeURIComponent(`[XÁC NHẬN CHẤM CÔNG] - ${STATE.user.name} (${STATE.user.username})`);
-            const body = encodeURIComponent(`Kính gửi Admin,\nTôi xin xác nhận check-in/out ca dạy.\nMã Code nhập: ${code}\nThời gian: ${new Date().toLocaleString('vi-VN')}\n\nTrân trọng.`);
-            window.location.href = `mailto:${BRAND.adminEmail}?subject=${subject}&body=${body}`;
+            if(!classCode || !adminCode) return showToast('Vui lòng nhập Mã Lớp và Mã Code', 'WARNING');
             
-            document.getElementById('staff_manual_code').value = '';
-            showToast('Đang mở ứng dụng Mail...');
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('vi-VN', { hour12: false });
+            const dateStr = now.toLocaleDateString('vi-VN');
+
+            // Save to Mock Monitor System
+            const record = {
+                staffId: STATE.user.id, staffName: STATE.user.name,
+                classCode, adminCode, timeStr, timestamp: Date.now()
+            };
+            try {
+                if(STATE.isOnline && STATE.db) await addDoc(collection(STATE.db, 'artifacts', appId, 'public', 'data', 'attendance'), record);
+                else { STATE.attendanceRecords.push({id: 'att'+Date.now(), ...record}); localStorage.setItem('chem_att', JSON.stringify(STATE.attendanceRecords)); }
+            } catch(e) {}
+
+            // Generate Mailto Format
+            const subject = encodeURIComponent(`[XÁC NHẬN GIẢNG DẠY] Lớp ${classCode} – Ngày ${dateStr}`);
+            const bodyText = `Kính gửi Anh NGUYỄN HỮU HUY,
+
+Hệ thống Trung tâm đã ghi nhận việc Thầy/Cô xác nhận ca giảng dạy:
+
+Nội dung Thông tin:
+Giáo viên: ${STATE.user.name}
+Vai trò: ${STATE.user.type === 'TEACHER' ? 'Giáo viên' : 'Trợ giảng'}
+Môn: ${STATE.user.subject || 'N/A'}
+Lớp: ${classCode}
+Ngày: ${dateStr}
+Mã ca/Code: ${adminCode}
+Thời điểm quét/nhập: ${timeStr}
+Trạng thái: Đã xác nhận
+
+Kết quả chấm công: ĐÃ GHI NHẬN
+Hệ thống đã lưu thời điểm xác nhận QR/Code vào hồ sơ chấm công của Thầy/Cô.
+
+Trân trọng,
+${STATE.user.name}`;
+
+            const mailtoLink = `mailto:${BRAND.adminEmail}?subject=${subject}&body=${encodeURIComponent(bodyText)}`;
+            window.location.href = mailtoLink;
+            
+            showToast('Đã ghi nhận và mở ứng dụng Email');
+            document.getElementById('s_class').value = ''; document.getElementById('s_code').value = '';
         };
 
-        
-        // Documents Module
-        const renderDocsModule = (isAdmin) => `
-            <div class="max-w-5xl mx-auto h-full flex flex-col fade-in">
-                <div class="flex justify-between items-center mb-6 shrink-0 border-b-2 border-brand-dark pb-2">
-                    <h2 class="text-2xl font-black uppercase text-brand-dark">TÀI LIỆU CHUYÊN MÔN</h2>
-                    ${isAdmin ? `<button onclick="window.openDocModal()" class="px-4 py-2 bg-brand-dark text-white rounded-xl border-2 border-brand-dark font-black text-[10px] uppercase neo-btn"><i class="fa-solid fa-upload mr-1"></i> Đăng Link Tài Liệu</button>` : ''}
-                </div>
-                <div class="flex-1 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 overflow-y-auto custom-scrollbar content-start">
-                    ${STATE.documents.length === 0 ? '<div class="col-span-full text-center p-10 font-bold text-gray-400">Chưa có tài liệu nào</div>' : ''}
-                    ${STATE.documents.map(d => `
-                        <div class="bg-white border-2 border-brand-dark p-5 rounded-2xl shadow-sm hover:shadow-neo transition-all flex flex-col group">
-                            <div class="w-10 h-10 rounded bg-gray-100 border border-brand-dark flex items-center justify-center mb-3 text-brand-primary"><i class="fa-solid fa-file-pdf text-lg"></i></div>
-                            <h4 class="font-black text-sm uppercase leading-tight mb-1 truncate" title="${d.title}">${d.title}</h4>
-                            <p class="text-[10px] font-bold text-gray-500 mb-4 line-clamp-2">${d.desc}</p>
-                            <div class="mt-auto flex gap-2">
-                                <a href="${d.url}" target="_blank" class="flex-1 text-center py-2 bg-brand-light border-2 border-brand-dark rounded-lg font-black text-[10px] uppercase text-brand-dark hover:bg-brand-primary hover:text-white transition-colors">MỞ LINK</a>
-                                ${isAdmin ? `<button onclick="window.deleteDocItem('${d.id}')" class="w-9 border-2 border-brand-dark rounded-lg bg-white text-brand-accent hover:bg-brand-accent hover:text-white flex items-center justify-center"><i class="fa-solid fa-trash"></i></button>` : ''}
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-            </div>`;
-        
-        window.openDocModal = () => openModal('Thêm Tài Liệu Mới', `<form onsubmit="window.saveDocItem(event)" class="space-y-4"><div><label class="block text-[10px] font-black uppercase mb-1">Tên Tài Liệu</label><input type="text" id="d_title" class="w-full neo-input p-3 rounded-xl" required></div><div><label class="block text-[10px] font-black uppercase mb-1">Đường dẫn URL (Google Drive, Docs...)</label><input type="url" id="d_url" class="w-full neo-input p-3 rounded-xl" required></div><div><label class="block text-[10px] font-black uppercase mb-1">Mô tả ngắn</label><input type="text" id="d_desc" class="w-full neo-input p-3 rounded-xl"></div><button type="submit" class="w-full bg-brand-dark text-white font-black uppercase py-4 neo-btn rounded-xl">Đăng Tài Liệu</button></form>`);
-        window.saveDocItem = async(e) => { e.preventDefault(); const data = {title: document.getElementById('d_title').value, url: document.getElementById('d_url').value, desc: document.getElementById('d_desc').value}; try { if(STATE.isOnline) await addDoc(collection(STATE.db, 'documents'), data); else { STATE.documents.push({id:'d'+Date.now(), ...data}); localStorage.setItem('chem_docs', JSON.stringify(STATE.documents));} showToast('Đã thêm'); closeModal(); renderApp(); }catch(e){} };
-        window.deleteDocItem = async(id) => { if(confirm('Xóa tài liệu?')) { try{ if(STATE.isOnline) await deleteDoc(doc(STATE.db, 'documents', id)); else {STATE.documents=STATE.documents.filter(x=>x.id!==id); localStorage.setItem('chem_docs', JSON.stringify(STATE.documents));} renderApp(); }catch(e){} } };
+        window.deleteAttendance = async (id) => {
+            if(confirm('Xóa bản ghi này?')) {
+                try {
+                    if(STATE.isOnline && STATE.db) await deleteDoc(doc(STATE.db, 'artifacts', appId, 'public', 'data', 'attendance', id));
+                    else { STATE.attendanceRecords = STATE.attendanceRecords.filter(x=>x.id!==id); localStorage.setItem('chem_att', JSON.stringify(STATE.attendanceRecords)); }
+                    renderApp();
+                } catch(e){}
+            }
+        };
 
-        // Requests Module (Duyệt/Gửi Yêu Cầu)
         const renderRequestsModule = (isAdmin) => {
             const reqs = isAdmin ? STATE.requests : STATE.requests.filter(r => r.staffId === STATE.user.id);
             return `
-            <div class="max-w-5xl mx-auto h-full flex flex-col fade-in">
-                <div class="flex justify-between items-center mb-6 shrink-0 border-b-2 border-brand-dark pb-2">
-                    <h2 class="text-2xl font-black uppercase text-brand-dark">${isAdmin ? 'QUẢN LÝ YÊU CẦU' : 'GỬI YÊU CẦU'}</h2>
-                    ${!isAdmin ? `<button onclick="window.openReqModal()" class="px-4 py-2 bg-brand-dark text-white rounded-xl border-2 border-brand-dark font-black text-[10px] uppercase neo-btn"><i class="fa-solid fa-paper-plane mr-1"></i> Viết Yêu Cầu</button>` : ''}
+            <div class="max-w-5xl mx-auto h-full flex flex-col fade-in w-full">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 shrink-0 border-b-2 border-brand-dark pb-3 gap-3">
+                    <h2 class="text-xl md:text-2xl font-black uppercase text-brand-dark tracking-tight">${isAdmin ? 'DUYỆT YÊU CẦU' : 'GỬI YÊU CẦU'}</h2>
+                    ${!isAdmin ? `<button onclick="window.openReqModal()" class="w-full sm:w-auto px-4 py-2 bg-brand-dark text-white rounded-xl border-2 border-brand-dark font-black text-[10px] md:text-xs uppercase neo-btn"><i class="fa-solid fa-paper-plane mr-1"></i> Viết Yêu Cầu</button>` : ''}
                 </div>
-                <div class="flex-1 overflow-y-auto custom-scrollbar space-y-3">
-                    ${reqs.length === 0 ? '<div class="text-center p-10 font-bold text-gray-400">Trống</div>' : ''}
+                <div class="flex-1 overflow-y-auto custom-scrollbar space-y-3 w-full">
+                    ${reqs.length === 0 ? '<div class="text-center p-10 font-bold text-gray-400 border-2 border-dashed border-gray-300 rounded-2xl bg-gray-50">Chưa có yêu cầu nào</div>' : ''}
                     ${reqs.map(r => `
-                        <div class="bg-white border-2 border-brand-dark p-4 rounded-xl flex items-center justify-between group shadow-sm">
-                            <div>
-                                <div class="flex items-center gap-2 mb-1">
-                                    <span class="px-2 py-0.5 text-[9px] font-black uppercase border border-brand-dark rounded ${r.status==='PENDING'?'bg-brand-yellow text-brand-dark':r.status==='APPROVED'?'bg-brand-primary text-white':'bg-brand-accent text-white'}">${r.status==='PENDING'?'Chờ duyệt':r.status==='APPROVED'?'Đã duyệt':'Từ chối'}</span>
-                                    <span class="text-[10px] font-bold text-gray-500">${r.date}</span>
+                        <div class="bg-white border-2 border-brand-dark p-3 md:p-4 rounded-xl flex flex-col md:flex-row items-start md:items-center justify-between group shadow-sm gap-3">
+                            <div class="w-full md:w-auto">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="px-2 py-0.5 text-[8px] md:text-[9px] font-black uppercase border border-brand-dark rounded ${r.status==='PENDING'?'bg-brand-yellow text-brand-dark':r.status==='APPROVED'?'bg-brand-primary text-white':'bg-brand-accent text-white'}">${r.status==='PENDING'?'Chờ duyệt':r.status==='APPROVED'?'Đã duyệt':'Từ chối'}</span>
+                                    <span class="text-[9px] md:text-[10px] font-bold text-gray-500 bg-gray-100 px-2 py-0.5 rounded border border-gray-200">Gửi lúc: ${r.date}</span>
                                 </div>
-                                <h4 class="font-black text-sm uppercase">${r.type} ${isAdmin ? ` - <span class="text-brand-primary">${r.staffName}</span>` : ''}</h4>
-                                <p class="text-xs font-medium text-gray-600 mt-1">${r.content}</p>
+                                <h4 class="font-black text-xs md:text-sm uppercase text-brand-dark">${r.type} ${isAdmin ? ` - <span class="text-brand-primary bg-brand-light px-1 rounded">${r.staffName}</span>` : ''}</h4>
+                                <div class="text-[10px] md:text-xs font-medium text-gray-700 mt-2 bg-gray-50 p-2 rounded border border-gray-200 line-clamp-3">Lý do: ${r.reason}</div>
                             </div>
-                            ${isAdmin && r.status === 'PENDING' ? `
-                                <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <button onclick="window.updateReq('${r.id}','APPROVED')" class="px-3 py-1.5 bg-brand-primary text-white border-2 border-brand-dark rounded text-[10px] font-black uppercase hover:bg-emerald-600">Duyệt</button>
-                                    <button onclick="window.updateReq('${r.id}','REJECTED')" class="px-3 py-1.5 bg-brand-accent text-white border-2 border-brand-dark rounded text-[10px] font-black uppercase hover:bg-pink-600">Từ Chối</button>
-                                </div>
-                            ` : ''}
+                            <div class="flex gap-2 w-full md:w-auto justify-end shrink-0">
+                                ${isAdmin && r.status === 'PENDING' ? `
+                                    <button onclick="window.updateReq('${r.id}','APPROVED')" class="flex-1 md:flex-none px-3 py-2 bg-brand-primary text-white border-2 border-brand-dark rounded-lg text-[9px] font-black uppercase hover:bg-emerald-600 shadow-sm">Duyệt</button>
+                                    <button onclick="window.updateReq('${r.id}','REJECTED')" class="flex-1 md:flex-none px-3 py-2 bg-white text-brand-accent border-2 border-brand-dark rounded-lg text-[9px] font-black uppercase hover:bg-pink-50 shadow-sm">Từ Chối</button>
+                                ` : ''}
+                                ${(!isAdmin && r.status === 'PENDING') || isAdmin ? `<button onclick="window.deleteReq('${r.id}')" class="w-8 md:w-9 h-8 md:h-9 border-2 border-brand-dark rounded-lg bg-white text-brand-accent flex items-center justify-center hover:bg-brand-accent hover:text-white shadow-sm"><i class="fa-solid fa-trash"></i></button>` : ''}
+                            </div>
                         </div>
                     `).join('')}
                 </div>
             </div>`;
         };
-        window.openReqModal = () => openModal('Tạo Yêu Cầu Mới', `<form onsubmit="window.saveReq(event)" class="space-y-4"><div><label class="block text-[10px] font-black uppercase mb-1">Loại Yêu Cầu</label><select id="r_type" class="w-full neo-input p-3 rounded-xl bg-white"><option value="Xin Nghỉ Phép">Xin Nghỉ Phép</option><option value="Đổi Ca Dạy">Đổi Ca Dạy</option><option value="Dạy Thay">Dạy Thay</option></select></div><div><label class="block text-[10px] font-black uppercase mb-1">Nội dung / Lý do</label><textarea id="r_content" class="w-full neo-input p-3 rounded-xl h-24" required></textarea></div><button type="submit" class="w-full bg-brand-dark text-white font-black uppercase py-4 neo-btn rounded-xl">Gửi Yêu Cầu</button></form>`);
-        window.saveReq = async(e) => { e.preventDefault(); const data = {type: document.getElementById('r_type').value, content: document.getElementById('r_content').value, staffId: STATE.user.id, staffName: STATE.user.name, status: 'PENDING', date: formatDate(new Date())}; try{ if(STATE.isOnline) await addDoc(collection(STATE.db, 'requests'), data); else{STATE.requests.push({id:'r'+Date.now(),...data}); localStorage.setItem('chem_reqs', JSON.stringify(STATE.requests));} showToast('Đã gửi yêu cầu'); closeModal(); renderApp(); }catch(e){} };
-        window.updateReq = async(id, status) => { try{ if(STATE.isOnline) await updateDoc(doc(STATE.db, 'requests', id), {status}); else {const idx=STATE.requests.findIndex(x=>x.id===id); if(idx!==-1) STATE.requests[idx].status=status; localStorage.setItem('chem_reqs', JSON.stringify(STATE.requests));} renderApp(); }catch(e){} };
-
-        // Announcements Module (Bảng Tin)
-        const renderAnnouncementsModule = () => `
-            <div class="max-w-4xl mx-auto h-full flex flex-col fade-in">
-                <div class="flex justify-between items-center mb-6 shrink-0 border-b-2 border-brand-dark pb-2">
-                    <h2 class="text-2xl font-black uppercase text-brand-dark">QUẢN LÝ BẢNG TIN PUBLIC</h2>
-                    <button onclick="window.openAnnModal()" class="px-4 py-2 bg-brand-primary text-white rounded-xl border-2 border-brand-dark font-black text-[10px] uppercase neo-btn"><i class="fa-solid fa-plus mr-1"></i> Tạo Tin Mới</button>
+        window.openReqModal = () => {
+            const html = `
+            <form onsubmit="window.saveReq(event)" class="space-y-4">
+                <div><label class="block text-[10px] font-black uppercase mb-1 text-gray-600">Phân Loại Yêu Cầu</label>
+                    <select id="r_type" class="w-full neo-input p-3 rounded-xl bg-white text-sm font-bold"><option value="Xin Nghỉ Phép">Xin Nghỉ Phép</option><option value="Đổi Ca Dạy">Đổi Ca Dạy</option><option value="Dạy Thay">Dạy Thay</option></select>
                 </div>
-                <div class="flex-1 overflow-y-auto custom-scrollbar space-y-4">
-                    ${[...STATE.loginAnnouncements, ...STATE.marqueeAnnouncements].length === 0 ? '<p class="text-center font-bold text-gray-400 mt-10">Chưa có bản tin nào</p>' : ''}
-                    ${[...STATE.loginAnnouncements, ...STATE.marqueeAnnouncements].map(a => `
-                        <div class="bg-white border-2 border-brand-dark p-5 rounded-2xl flex justify-between items-start group shadow-sm">
-                            <div class="pr-6">
-                                <div class="flex gap-2 mb-2">
-                                    <span class="px-2 py-0.5 text-[9px] font-black uppercase border border-brand-dark rounded ${a.type==='MARQUEE'?'bg-brand-yellow':'bg-brand-light'}">${a.type==='MARQUEE'?'Thanh Topbar (Chạy chữ)':'Trang Đăng Nhập (Cố định)'}</span>
-                                    <span class="text-[10px] font-bold text-gray-500">${getFormatDisplay(a.date)}</span>
-                                </div>
-                                <h4 class="font-black text-sm uppercase">${a.title}</h4>
-                                ${a.content ? `<p class="text-xs font-medium text-gray-600 mt-1 line-clamp-2">${a.content}</p>` : ''}
+                <div><label class="block text-[10px] font-black uppercase mb-1 text-gray-600">Ngày Giờ Xin Nghỉ / Đổi</label><input type="datetime-local" id="r_datetime" class="w-full neo-input p-3 rounded-xl text-sm" required></div>
+                <div><label class="block text-[10px] font-black uppercase mb-1 text-gray-600">Lý do chi tiết</label><textarea id="r_reason" class="w-full neo-input p-3 rounded-xl h-24 text-sm" placeholder="Ghi rõ lý do và đề xuất giải pháp (nếu có)..." required></textarea></div>
+                <div class="bg-gray-50 border-2 border-brand-dark p-4 rounded-xl space-y-3">
+                    <div class="flex items-start gap-3"><input type="checkbox" id="r_commit" required class="w-4 h-4 mt-0.5"><label class="text-[10px] md:text-xs font-bold leading-tight">Tôi cam kết đã bàn giao công việc/giáo án đầy đủ cho người tiếp nhận (nếu có).</label></div>
+                    <div class="flex items-start gap-3"><input type="checkbox" id="r_confirm" required class="w-4 h-4 mt-0.5"><label class="text-[10px] md:text-xs font-bold leading-tight">Tôi xác nhận các thông tin khai báo trên là chính xác.</label></div>
+                </div>
+                <button type="submit" class="w-full bg-brand-dark text-white font-black uppercase py-4 neo-btn rounded-xl shadow-neo mt-2">Gửi Yêu Cầu Đến Quản Lý</button>
+            </form>`;
+            openModal('Viết Yêu Cầu Mới', html);
+        };
+        window.saveReq = async(e) => { e.preventDefault(); const d = new Date(); const dateStr = `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()} ${d.getHours()}:${d.getMinutes()}`; const data = {type: document.getElementById('r_type').value, reason: document.getElementById('r_reason').value, datetime: document.getElementById('r_datetime').value, staffId: STATE.user.id, staffName: STATE.user.name, status: 'PENDING', date: dateStr}; try{ if(STATE.isOnline && STATE.db) await addDoc(collection(STATE.db, 'artifacts', appId, 'public', 'data', 'requests'), data); else{STATE.requests.push({id:'r'+Date.now(),...data}); localStorage.setItem('chem_reqs', JSON.stringify(STATE.requests));} showToast('Đã gửi yêu cầu thành công'); closeModal(); renderApp(); }catch(e){} };
+        window.updateReq = async(id, status) => { try{ if(STATE.isOnline && STATE.db) await updateDoc(doc(STATE.db, 'artifacts', appId, 'public', 'data', 'requests', id), {status}); else {const idx=STATE.requests.findIndex(x=>x.id===id); if(idx!==-1) STATE.requests[idx].status=status; localStorage.setItem('chem_reqs', JSON.stringify(STATE.requests));} renderApp(); }catch(e){} };
+        window.deleteReq = async(id) => { if(confirm('Hủy/Xóa yêu cầu này?')) { try{ if(STATE.isOnline && STATE.db) await deleteDoc(doc(STATE.db, 'artifacts', appId, 'public', 'data', 'requests', id)); else {STATE.requests = STATE.requests.filter(x=>x.id!==id); localStorage.setItem('chem_reqs', JSON.stringify(STATE.requests));} renderApp(); }catch(e){} }};
+
+        const renderDocsModule = (isAdmin) => `
+            <div class="max-w-5xl mx-auto h-full flex flex-col fade-in w-full">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 shrink-0 border-b-2 border-brand-dark pb-3 gap-3">
+                    <h2 class="text-xl md:text-2xl font-black uppercase text-brand-dark tracking-tight">TÀI LIỆU CHUYÊN MÔN</h2>
+                    ${isAdmin ? `<button onclick="window.openDocModal()" class="w-full sm:w-auto px-4 py-2 bg-brand-dark text-white rounded-xl border-2 border-brand-dark font-black text-[10px] md:text-xs uppercase neo-btn flex justify-center"><i class="fa-solid fa-upload mr-1"></i> Đăng Link Tài Liệu</button>` : ''}
+                </div>
+                <div class="flex-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 overflow-y-auto custom-scrollbar content-start pb-4">
+                    ${STATE.documents.length === 0 ? '<div class="col-span-full text-center p-10 font-bold text-gray-400 bg-gray-50 border-2 border-dashed border-gray-300 rounded-2xl">Chưa có tài liệu nào</div>' : ''}
+                    ${STATE.documents.map(d => `
+                        <div class="bg-white border-2 border-brand-dark p-4 md:p-5 rounded-2xl shadow-sm hover:shadow-neo transition-all flex flex-col group h-[160px] md:h-[180px]">
+                            <div class="w-8 h-8 md:w-10 md:h-10 rounded bg-gray-100 border border-brand-dark flex items-center justify-center mb-2 md:mb-3 text-brand-primary shrink-0"><i class="fa-solid fa-file-pdf text-base md:text-lg"></i></div>
+                            <h4 class="font-black text-xs md:text-sm uppercase leading-tight mb-1 truncate text-brand-dark" title="${d.title}">${d.title}</h4>
+                            <p class="text-[9px] md:text-[10px] font-bold text-gray-500 mb-2 md:mb-4 line-clamp-2">${d.desc || '---'}</p>
+                            <div class="mt-auto flex gap-2 pt-2 border-t border-gray-100">
+                                <a href="${d.url}" target="_blank" class="flex-1 text-center py-1.5 md:py-2 bg-brand-light border-2 border-brand-dark rounded-lg font-black text-[9px] md:text-[10px] uppercase text-brand-dark hover:bg-brand-primary hover:text-white transition-colors">TẢI / XEM</a>
+                                ${isAdmin ? `<button onclick="window.deleteDocItem('${d.id}')" class="w-8 md:w-9 border-2 border-brand-dark rounded-lg bg-white text-brand-accent hover:bg-brand-accent hover:text-white flex items-center justify-center transition-colors"><i class="fa-solid fa-trash text-xs"></i></button>` : ''}
                             </div>
-                            <button onclick="window.deleteAnn('${a.id}', '${a.type}')" class="w-8 h-8 border-2 border-brand-dark rounded-lg bg-white text-brand-accent hover:bg-brand-accent hover:text-white shrink-0"><i class="fa-solid fa-trash"></i></button>
                         </div>
                     `).join('')}
                 </div>
             </div>`;
-        
-        window.openAnnModal = () => openModal('Tạo Thông Báo Public', `<form onsubmit="window.saveAnn(event)" class="space-y-4"><div><label class="block text-[10px] font-black uppercase mb-1">Vị Trí Hiển Thị</label><select id="a_type" class="w-full neo-input p-3 rounded-xl bg-white"><option value="LOGIN">Bảng thông tin ở Trang Đăng Nhập (Cố định)</option><option value="MARQUEE">Thanh Topbar (Dòng chữ chạy ngang)</option></select></div><div><label class="block text-[10px] font-black uppercase mb-1">Tiêu đề (Hiển thị chính)</label><input type="text" id="a_title" class="w-full neo-input p-3 rounded-xl" required></div><div><label class="block text-[10px] font-black uppercase mb-1">Nội dung chi tiết (Dành cho trang Đăng nhập)</label><textarea id="a_content" class="w-full neo-input p-3 rounded-xl h-24"></textarea></div><button type="submit" class="w-full bg-brand-dark text-white font-black uppercase py-4 neo-btn rounded-xl">Phát Hành</button></form>`);
-        window.saveAnn = async(e) => { e.preventDefault(); const data = {type: document.getElementById('a_type').value, title: document.getElementById('a_title').value, content: document.getElementById('a_content').value, date: formatDate(new Date())}; try{ if(STATE.isOnline) await addDoc(collection(STATE.db, 'announcements'), data); else { const all = JSON.parse(localStorage.getItem('chem_anns'))||[]; all.push({id:'a'+Date.now(),...data}); localStorage.setItem('chem_anns', JSON.stringify(all)); STATE[data.type==='LOGIN'?'loginAnnouncements':'marqueeAnnouncements'].push({id:'a'+Date.now(),...data}); } showToast('Đăng thành công'); closeModal(); renderApp(); }catch(e){} };
-        window.deleteAnn = async(id, type) => { if(confirm('Xóa thông báo này?')) { try{ if(STATE.isOnline) await deleteDoc(doc(STATE.db, 'announcements', id)); else { let all = JSON.parse(localStorage.getItem('chem_anns'))||[]; all = all.filter(x=>x.id!==id); localStorage.setItem('chem_anns', JSON.stringify(all)); STATE[type==='LOGIN'?'loginAnnouncements':'marqueeAnnouncements'] = STATE[type==='LOGIN'?'loginAnnouncements':'marqueeAnnouncements'].filter(x=>x.id!==id); } renderApp(); }catch(e){} } };
+        window.openDocModal = () => openModal('Thêm Link Tài Liệu', `<form onsubmit="window.saveDocItem(event)" class="space-y-4"><div><label class="block text-[10px] font-black uppercase mb-1">Tên Tài Liệu</label><input type="text" id="d_title" class="w-full neo-input p-3 rounded-xl text-sm" required></div><div><label class="block text-[10px] font-black uppercase mb-1">Đường dẫn URL (Google Drive, Dropbox...)</label><input type="url" id="d_url" class="w-full neo-input p-3 rounded-xl text-sm" required></div><div><label class="block text-[10px] font-black uppercase mb-1">Mô tả ngắn</label><textarea id="d_desc" class="w-full neo-input p-3 rounded-xl text-sm h-20"></textarea></div><button type="submit" class="w-full bg-brand-dark text-white font-black uppercase py-4 neo-btn rounded-xl mt-2">Đăng Tài Liệu</button></form>`);
+        window.saveDocItem = async(e) => { e.preventDefault(); const data = {title: document.getElementById('d_title').value, url: document.getElementById('d_url').value, desc: document.getElementById('d_desc').value}; try { if(STATE.isOnline && STATE.db) await addDoc(collection(STATE.db, 'artifacts', appId, 'public', 'data', 'documents'), data); else { STATE.documents.push({id:'d'+Date.now(), ...data}); localStorage.setItem('chem_docs', JSON.stringify(STATE.documents));} showToast('Đã thêm tài liệu'); closeModal(); renderApp(); }catch(e){} };
+        window.deleteDocItem = async(id) => { if(confirm('Xóa tài liệu này?')) { try{ if(STATE.isOnline && STATE.db) await deleteDoc(doc(STATE.db, 'artifacts', appId, 'public', 'data', 'documents', id)); else {STATE.documents=STATE.documents.filter(x=>x.id!==id); localStorage.setItem('chem_docs', JSON.stringify(STATE.documents));} renderApp(); }catch(e){} } };
 
-        // Init
+        const renderAnnouncementsModule = () => `
+            <div class="max-w-4xl mx-auto h-full flex flex-col fade-in w-full">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 shrink-0 border-b-2 border-brand-dark pb-3 gap-3">
+                    <h2 class="text-xl md:text-2xl font-black uppercase text-brand-dark tracking-tight">BẢNG TIN SYSTEM</h2>
+                    <button onclick="window.openAnnModal()" class="w-full sm:w-auto px-4 py-2 bg-brand-primary text-white rounded-xl border-2 border-brand-dark font-black text-[10px] md:text-xs uppercase neo-btn flex justify-center"><i class="fa-solid fa-plus mr-1"></i> Viết Tin Mới</button>
+                </div>
+                <div class="flex-1 overflow-y-auto custom-scrollbar space-y-3 md:space-y-4 pr-1">
+                    ${[...STATE.loginAnnouncements, ...STATE.marqueeAnnouncements].length === 0 ? '<p class="text-center font-bold text-gray-400 mt-10 bg-gray-50 border-2 border-dashed border-gray-300 p-6 rounded-xl">Chưa có thông báo nào được phát hành</p>' : ''}
+                    ${[...STATE.loginAnnouncements, ...STATE.marqueeAnnouncements].map(a => `
+                        <div class="bg-white border-2 border-brand-dark p-4 md:p-5 rounded-2xl flex flex-col sm:flex-row justify-between items-start group shadow-sm gap-3">
+                            <div class="pr-0 sm:pr-6 w-full">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="px-2 py-0.5 text-[8px] md:text-[9px] font-black uppercase border border-brand-dark rounded ${a.type==='MARQUEE'?'bg-brand-yellow text-brand-dark':'bg-brand-light text-brand-dark'}">${a.type==='MARQUEE'?'Thanh Chạy Topbar':'Bảng Tin Đăng Nhập'}</span>
+                                    <span class="text-[9px] md:text-[10px] font-bold text-gray-500 border border-gray-200 bg-gray-50 px-2 py-0.5 rounded">${getFormatDisplay(a.date)}</span>
+                                </div>
+                                <h4 class="font-black text-sm md:text-base uppercase text-brand-dark">${a.title}</h4>
+                                ${a.content ? `<p class="text-[10px] md:text-xs font-medium text-gray-600 mt-2 bg-gray-50 p-2 rounded border border-gray-100 line-clamp-3">${a.content}</p>` : ''}
+                            </div>
+                            <button onclick="window.deleteAnn('${a.id}', '${a.type}')" class="w-full sm:w-9 h-8 sm:h-9 border-2 border-brand-dark rounded-lg bg-white text-brand-accent flex items-center justify-center hover:bg-brand-accent hover:text-white shrink-0 transition-colors sm:opacity-0 group-hover:opacity-100"><i class="fa-solid fa-trash text-sm"></i> <span class="ml-2 font-black text-xs sm:hidden">XÓA BẢN TIN</span></button>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>`;
+        window.openAnnModal = () => openModal('Phát Hành Thông Báo Public', `<form onsubmit="window.saveAnn(event)" class="space-y-4"><div><label class="block text-[10px] font-black uppercase mb-1">Vị Trí Hiển Thị</label><select id="a_type" class="w-full neo-input p-3 rounded-xl bg-white text-sm font-bold"><option value="LOGIN">Bảng thông tin trang Đăng Nhập (Cố định khối lớn)</option><option value="MARQUEE">Thanh Topbar (Dòng chữ chạy ngang phía trên cùng)</option></select></div><div><label class="block text-[10px] font-black uppercase mb-1">Tiêu đề (Hiển thị chính)</label><input type="text" id="a_title" class="w-full neo-input p-3 rounded-xl text-sm" required></div><div><label class="block text-[10px] font-black uppercase mb-1">Nội dung chi tiết (Chỉ dành cho Bảng tin Đăng Nhập)</label><textarea id="a_content" class="w-full neo-input p-3 rounded-xl h-24 text-sm" placeholder="Nhập nội dung đầy đủ của thông báo..."></textarea></div><button type="submit" class="w-full bg-brand-dark text-white font-black uppercase py-4 neo-btn rounded-xl shadow-neo mt-2">Phát Hành Ngay</button></form>`);
+        window.saveAnn = async(e) => { e.preventDefault(); const data = {type: document.getElementById('a_type').value, title: document.getElementById('a_title').value.trim(), content: document.getElementById('a_content').value.trim(), date: formatDate(new Date())}; try{ if(STATE.isOnline && STATE.db) await addDoc(collection(STATE.db, 'artifacts', appId, 'public', 'data', 'announcements'), data); else { const all = JSON.parse(localStorage.getItem('chem_anns'))||[]; all.push({id:'a'+Date.now(),...data}); localStorage.setItem('chem_anns', JSON.stringify(all)); STATE[data.type==='LOGIN'?'loginAnnouncements':'marqueeAnnouncements'].push({id:'a'+Date.now(),...data}); } showToast('Đăng thông báo thành công'); closeModal(); renderApp(); }catch(e){} };
+        window.deleteAnn = async(id, type) => { if(confirm('Xóa thông báo này vĩnh viễn?')) { try{ if(STATE.isOnline && STATE.db) await deleteDoc(doc(STATE.db, 'artifacts', appId, 'public', 'data', 'announcements', id)); else { let all = JSON.parse(localStorage.getItem('chem_anns'))||[]; all = all.filter(x=>x.id!==id); localStorage.setItem('chem_anns', JSON.stringify(all)); STATE[type==='LOGIN'?'loginAnnouncements':'marqueeAnnouncements'] = STATE[type==='LOGIN'?'loginAnnouncements':'marqueeAnnouncements'].filter(x=>x.id!==id); } showToast('Đã xóa thông báo'); renderApp(); }catch(e){} } };
+
         window.onload = () => { initFirebase(); };
     </script>
 </body>
